@@ -1,0 +1,3670 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <title>ExamCraft AI — Your study workspace</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+            rel="stylesheet"
+        />
+        <!-- EDIT H1: colours, fonts, spacing, mobile layout and animations -->
+        <style>
+/* VIVA: layout, colours, responsive rules and animations. */
+:root {
+    --bg: #f8f9ff;
+    --surface: #fff;
+    --ink: #20233d;
+    --muted: #626780;
+    --purple: #6340d6;
+    --purple2: #9d85ff;
+    --line: #ebebf5;
+    --shadow: 0 14px 45px rgba(53, 40, 116, 0.055);
+    --radius: 20px;
+}
+* {
+    box-sizing: border-box;
+}
+html {
+    scroll-behavior: smooth;
+}
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+}
+button,
+input,
+select {
+    font: inherit;
+}
+button {
+    cursor: pointer;
+}
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+    outline: 3px solid #b8a8ff;
+    outline-offset: 2px;
+}
+button:active {
+    transform: scale(0.965) !important;
+}
+button,
+a,
+.tile,
+.card {
+    transition:
+        transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1),
+        background 0.25s,
+        border-color 0.25s,
+        box-shadow 0.3s,
+        color 0.2s;
+}
+h1,
+h2,
+h3,
+h4 {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    letter-spacing: -0.035em;
+}
+h1 {
+    font-size: 29px;
+    margin: 0 0 9px;
+}
+h2 {
+    font-size: 19px;
+    margin: 0;
+}
+h3 {
+    font-size: 15px;
+    margin: 0;
+}
+p {
+    color: var(--muted);
+    line-height: 1.6;
+    margin: 6px 0;
+}
+.app {
+    display: flex;
+    min-height: 100vh;
+}
+.sidebar {
+    width: 245px;
+    flex-shrink: 0;
+    background: #fff;
+    border-right: 1px solid var(--line);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    padding: 30px 16px 22px;
+    display: flex;
+    flex-direction: column;
+    z-index: 20;
+}
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 0 13px 36px;
+    font-family: 'Plus Jakarta Sans';
+    font-weight: 800;
+    font-size: 18px;
+    letter-spacing: -0.8px;
+}
+.brandmark {
+    width: 35px;
+    height: 35px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    color: white;
+    background: linear-gradient(135deg, #a48dff, #6d4ce8);
+    box-shadow: 0 7px 15px #b5a6ff66;
+    font-size: 19px;
+}
+.brand em {
+    color: var(--purple);
+    font-style: normal;
+}
+.nav-label {
+    color: #626780;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 0 15px;
+    margin: 14px 0 12px;
+}
+.nav {
+    display: grid;
+    gap: 5px;
+}
+.nav button {
+    width: 100%;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 0;
+    background: transparent;
+    border-radius: 11px;
+    padding: 13px 14px;
+    color: #777d98;
+    font-weight: 700;
+}
+.nav button:hover {
+    background: #f5f2ff;
+    color: var(--purple);
+    transform: translateX(3px);
+}
+.nav button.active {
+    background: #f0ebff;
+    color: var(--purple);
+}
+.nav svg,
+.icon svg {
+    width: 19px;
+    height: 19px;
+    stroke-width: 1.9;
+}
+.sidebar-bottom {
+    margin-top: auto;
+}
+.upgrade {
+    padding: 18px;
+    background: linear-gradient(140deg, #f2edff, #f9f7ff);
+    border-radius: 17px;
+}
+.upgrade strong {
+    display: block;
+    margin: 7px 0;
+}
+.upgrade p {
+    font-size: 12px;
+}
+.upgrade button {
+    border: 0;
+    border-radius: 9px;
+    background: white;
+    color: var(--purple);
+    padding: 9px 14px;
+    font-weight: 800;
+    margin-top: 7px;
+}
+.profile {
+    border-top: 1px solid var(--line);
+    margin-top: 18px;
+    padding: 20px 8px 0;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+.avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    background: #eee8ff;
+    color: var(--purple);
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+}
+.profile small {
+    color: var(--muted);
+}
+.main {
+    min-width: 0;
+    flex: 1;
+}
+.topbar {
+    height: 83px;
+    padding: 0 38px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.77);
+    backdrop-filter: blur(18px);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+.breadcrumb {
+    font-weight: 800;
+    color: #52536b;
+}
+.top-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.search {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 11px 14px;
+    border: 1px solid var(--line);
+    border-radius: 11px;
+    background: #fafaff;
+    color: #aaaac0;
+    min-width: 220px;
+}
+.search input {
+    border: 0;
+    outline: 0;
+    background: transparent;
+    width: 100%;
+    color: var(--ink);
+}
+.round {
+    border: 1px solid var(--line);
+    width: 39px;
+    height: 39px;
+    border-radius: 12px;
+    background: #fff;
+    display: grid;
+    place-items: center;
+    color: #626780;
+}
+.round:hover {
+    background: #f3efff;
+    color: var(--purple);
+    transform: translateY(-2px);
+}
+.content {
+    max-width: 1450px;
+    padding: 34px 38px 70px;
+    margin: auto;
+}
+.page {
+    display: none;
+}
+.page.active {
+    display: block;
+    animation: pageIn 0.48s cubic-bezier(0.2, 0.75, 0.2, 1) both;
+}
+@keyframes pageIn {
+    from {
+        opacity: 0;
+        transform: translateY(17px);
+        filter: blur(3px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0);
+    }
+}
+.eyebrow {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--purple);
+    letter-spacing: 0.6px;
+    margin-bottom: 8px;
+}
+.pagehead {
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+    align-items: center;
+    margin-bottom: 25px;
+}
+.btn {
+    border: 0;
+    border-radius: 11px;
+    padding: 12px 17px;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    justify-content: center;
+}
+.btn.primary {
+    color: white;
+    background: linear-gradient(110deg, #7047d9, #5935c5);
+    box-shadow: 0 7px 17px #7857e92c;
+}
+.btn.primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 25px #7857e950;
+}
+.btn.soft {
+    color: var(--purple);
+    background: #f0ebff;
+}
+.btn.soft:hover {
+    background: #e8dfff;
+    transform: translateY(-2px);
+}
+.btn.outline {
+    border: 1px solid var(--line);
+    background: white;
+    color: #5d5e79;
+}
+.btn.outline:hover {
+    border-color: #c7b8ff;
+    color: var(--purple);
+}
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+.grid {
+    display: grid;
+    gap: 20px;
+}
+.stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin-bottom: 21px;
+}
+.card {
+    background: var(--surface);
+    border: 1px solid #eeedf7;
+    border-radius: var(--radius);
+    padding: 22px;
+    box-shadow: var(--shadow);
+}
+.stat {
+    min-height: 145px;
+}
+.stat-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+}
+.stat .num {
+    font-family: 'Plus Jakarta Sans';
+    font-size: 27px;
+    font-weight: 800;
+    letter-spacing: -1px;
+}
+.stat small {
+    color: var(--muted);
+    font-weight: 700;
+}
+.stat .tag {
+    font-size: 11px;
+    color: #23a580;
+    font-weight: 800;
+    background: #eafaf2;
+    border-radius: 20px;
+    padding: 5px 8px;
+}
+.stat-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: #f2eeff;
+    color: var(--purple);
+    display: grid;
+    place-items: center;
+}
+.stat-icon.green {
+    background: #e9f9f3;
+    color: #36b99b;
+}
+.stat-icon.orange {
+    background: #fff4e6;
+    color: #e6a44d;
+}
+.stat-icon.blue {
+    background: #eaf3ff;
+    color: #5798f1;
+}
+.hero {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 22px;
+    background: linear-gradient(108deg, #6340d6, #7955d9);
+    border-radius: 21px;
+    color: white;
+    padding: 28px 33px;
+    margin-bottom: 21px;
+    overflow: hidden;
+    position: relative;
+}
+.hero:after {
+    content: '';
+    position: absolute;
+    width: 230px;
+    height: 230px;
+    border: 35px solid #ffffff15;
+    border-radius: 50%;
+    right: 35px;
+    top: -105px;
+}
+.hero h2 {
+    font-size: 23px;
+    position: relative;
+    z-index: 1;
+}
+.hero p {
+    color: #f4efff;
+    max-width: 560px;
+    position: relative;
+    z-index: 1;
+}
+.hero .btn {
+    background: white;
+    color: #684ce2;
+    margin-top: 11px;
+    position: relative;
+    z-index: 1;
+}
+.hero .btn:hover {
+    transform: translateY(-3px);
+}
+.hero-art {
+    font-size: 76px;
+    filter: drop-shadow(0 12px 12px #4b329144);
+    position: relative;
+    z-index: 1;
+    animation: float 5s ease-in-out infinite;
+}
+@keyframes float {
+    50% {
+        transform: translateY(-9px) rotate(4deg);
+    }
+}
+.two {
+    grid-template-columns: minmax(0, 1.6fr) minmax(290px, 1fr);
+}
+.section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+.section-head a {
+    color: var(--purple);
+    font-weight: 800;
+    cursor: pointer;
+}
+.pill {
+    background: #f2edff;
+    color: var(--purple);
+    padding: 8px 12px;
+    border: 0;
+    border-radius: 9px;
+    font-weight: 800;
+}
+.chartwrap {
+    height: 235px;
+    position: relative;
+}
+.chartwrap svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+.chart-labels {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 4px 0 32px;
+    color: #626780;
+    font-size: 11px;
+}
+.quick-list {
+    display: grid;
+    gap: 12px;
+}
+.tile {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    border: 1px solid var(--line);
+    border-radius: 13px;
+    padding: 15px;
+    cursor: pointer;
+}
+.tile:hover {
+    border-color: #c7b7ff;
+    background: #faf8ff;
+    transform: translateX(4px);
+}
+.tile strong {
+    display: block;
+}
+.tile p {
+    font-size: 12px;
+    margin: 2px 0;
+}
+.tile-icon {
+    width: 43px;
+    height: 43px;
+    flex-shrink: 0;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    font-size: 21px;
+    background: #f1ecff;
+}
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.table th {
+    text-align: left;
+    color: #626780;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 13px 10px;
+    border-bottom: 1px solid var(--line);
+}
+.table td {
+    padding: 17px 10px;
+    border-bottom: 1px solid #f1f0f8;
+}
+.table tr:last-child td {
+    border-bottom: 0;
+}
+.score {
+    font-weight: 800;
+    color: #2ba982;
+}
+.status {
+    background: #eaf8f0;
+    color: #299c72;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 800;
+}
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+.field {
+    display: grid;
+    gap: 8px;
+}
+.field label {
+    font-weight: 800;
+    color: #50536d;
+    font-size: 12px;
+}
+.input {
+    width: 100%;
+    padding: 13px 14px;
+    border: 1px solid #e7e5f2;
+    border-radius: 11px;
+    background: #fff;
+    color: #25263d;
+    outline: 0;
+}
+.input:focus {
+    border-color: #a48af7;
+    box-shadow: 0 0 0 4px #f0eaff;
+}
+.upload {
+    border: 2px dashed #d9cff9;
+    background: #fbfaff;
+    border-radius: 18px;
+    padding: 36px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.upload:hover,
+.upload.drag {
+    background: #f3efff;
+    border-color: #896cf1;
+    transform: translateY(-2px);
+}
+.upload .bigicon {
+    font-size: 35px;
+}
+.upload strong {
+    display: block;
+    margin: 10px 0 4px;
+}
+.upload p {
+    font-size: 12px;
+}
+.split {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 20px;
+}
+.counter-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid #f1f0f8;
+}
+.counter-row:last-child {
+    border-bottom: 0;
+}
+.counter-row input {
+    width: 84px;
+    text-align: center;
+}
+.preview-sheet {
+    background: #fff;
+    border: 1px solid #e5e4ed;
+    box-shadow: 0 15px 45px #2823440e;
+    border-radius: 8px;
+    padding: 27px 28px;
+    min-height: 390px;
+    color: #232335;
+}
+.preview-sheet h3 {
+    text-align: center;
+    font-size: 15px;
+    margin: 0 0 5px;
+}
+.preview-sheet .sub {
+    text-align: center;
+    font-weight: 700;
+    color: #55556a;
+    margin-bottom: 16px;
+}
+.preview-sheet .marks {
+    text-align: right;
+    font-size: 12px;
+    font-weight: 700;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 12px;
+}
+.preview-sheet h4 {
+    text-align: center;
+    font-size: 12px;
+    letter-spacing: 0.2px;
+    margin: 20px 0 10px;
+}
+.preview-sheet p {
+    font-size: 12px;
+    color: #27283d;
+    margin: 6px 0;
+    line-height: 1.55;
+}
+.preview-sheet .options {
+    margin-left: 15px;
+    color: #575970;
+}
+.muted {
+    color: var(--muted);
+}
+.flex {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.between {
+    justify-content: space-between;
+}
+.test-option {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 15px;
+    margin-top: 11px;
+    cursor: pointer;
+    transition: 0.25s;
+}
+.test-option:hover {
+    background: #f9f6ff;
+    border-color: #cbbdff;
+    transform: translateX(3px);
+}
+.test-option.selected {
+    background: #f1ecff;
+    border-color: #967df6;
+    color: #6144da;
+    font-weight: 800;
+}
+.option-letter {
+    width: 28px;
+    height: 28px;
+    border: 1px solid #ddd8f0;
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+}
+.progress {
+    height: 8px;
+    border-radius: 10px;
+    background: #f0edfa;
+    overflow: hidden;
+}
+.progress > div {
+    height: 100%;
+    background: linear-gradient(90deg, #a78aff, #6e50e6);
+    transition: width 0.5s;
+}
+.timer {
+    font-size: 22px;
+    font-weight: 800;
+    font-family: 'Plus Jakarta Sans';
+    color: var(--purple);
+}
+.results-list {
+    display: grid;
+    gap: 12px;
+}
+.result-item {
+    border: 1px solid var(--line);
+    padding: 15px;
+    border-radius: 13px;
+}
+.result-item strong {
+    display: block;
+    margin-bottom: 8px;
+}
+.good {
+    color: #229b72;
+}
+.bad {
+    color: #d45d6a;
+}
+.small {
+    font-size: 12px;
+}
+.hidden {
+    display: none !important;
+}
+.toast {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    z-index: 100;
+    background: #272344;
+    color: white;
+    padding: 15px 20px;
+    border-radius: 12px;
+    box-shadow: 0 16px 35px #25203a33;
+    opacity: 0;
+    transform: translateY(25px);
+    pointer-events: none;
+    transition: 0.35s;
+}
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+.empty {
+    padding: 38px;
+    text-align: center;
+    color: var(--muted);
+}
+.mini-card {
+    background: #faf9ff;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 18px;
+}
+.toggle {
+    width: 44px;
+    height: 25px;
+    background: #d8d3ea;
+    border: 0;
+    border-radius: 30px;
+    padding: 3px;
+    display: flex;
+    align-items: center;
+}
+.toggle.on {
+    background: #8c6df1;
+}
+.toggle:after {
+    content: '';
+    width: 19px;
+    height: 19px;
+    border-radius: 50%;
+    background: white;
+    transition: transform 0.25s;
+}
+.toggle.on:after {
+    transform: translateX(19px);
+}
+.footer-note {
+    font-size: 11px;
+    color: #626780;
+    margin-top: 20px;
+}
+.mobile-menu {
+    display: none;
+}
+.clickable {
+    cursor: pointer;
+}
+.fade-up {
+    animation: pageIn 0.6s both;
+}
+.fade-up:nth-child(2) {
+    animation-delay: 0.06s;
+}
+.fade-up:nth-child(3) {
+    animation-delay: 0.12s;
+}
+.fade-up:nth-child(4) {
+    animation-delay: 0.18s;
+}
+@media (max-width: 1100px) {
+    .stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .two,
+    .split {
+        grid-template-columns: 1fr;
+    }
+    .sidebar {
+        width: 215px;
+    }
+    .content {
+        padding: 28px 25px;
+    }
+    .topbar {
+        padding: 0 25px;
+    }
+}
+@media (max-width: 700px) {
+    .sidebar {
+        position: fixed;
+        left: 0;
+        transform: translateX(-100%);
+        transition: transform 0.35s;
+        width: 255px;
+        box-shadow: 0 20px 50px #2d245022;
+    }
+    .sidebar.open {
+        transform: translateX(0);
+    }
+    .mobile-menu {
+        display: grid;
+    }
+    .topbar {
+        height: 70px;
+        padding: 0 16px;
+    }
+    .content {
+        padding: 22px 15px 50px;
+    }
+    .search {
+        display: none;
+    }
+    .pagehead {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+    .stats {
+        gap: 10px;
+    }
+    .stat {
+        padding: 15px;
+        min-height: 125px;
+    }
+    .stat .num {
+        font-size: 23px;
+    }
+    .card {
+        padding: 17px;
+    }
+    .hero {
+        padding: 24px;
+    }
+    .hero-art {
+        display: none;
+    }
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+    .table {
+        font-size: 12px;
+    }
+    .table td,
+    .table th {
+        padding: 12px 5px;
+    }
+    h1 {
+        font-size: 24px;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *:before,
+    *:after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+:root {
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+input::placeholder {
+    color: #6b6e85;
+}
+select option {
+    color: #20233d;
+    background: white;
+}
+.nav button {
+    color: #626780;
+}
+.num {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 30px;
+    font-weight: 800;
+}
+.tag {
+    color: #146747 !important;
+    background: #e9f7ef !important;
+}
+.score,
+.good {
+    color: #167450;
+}
+.bad {
+    color: #af334a;
+}
+.status {
+    color: #167450;
+}
+.search {
+    color: #626780;
+}
+.footer-note {
+    line-height: 1.7;
+}
+.card:hover {
+    box-shadow: 0 18px 46px #35287410;
+}
+.page.active {
+    animation: pageIn 0.55s var(--ease) both;
+}
+.page.leaving {
+    animation: pageOut 0.16s ease both;
+}
+@keyframes pageOut {
+    to {
+        opacity: 0;
+        transform: translateY(-7px);
+    }
+}
+.page.active > .card,
+.page.active > .grid > .card {
+    animation: pageIn 0.65s var(--ease) both;
+}
+.btn {
+    position: relative;
+    overflow: hidden;
+    min-height: 44px;
+}
+.ripple {
+    position: absolute;
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.14;
+    pointer-events: none;
+    animation: ripple 0.6s ease-out forwards;
+    transform: translate(-50%, -50%);
+}
+@keyframes ripple {
+    to {
+        transform: translate(-50%, -50%) scale(4);
+        opacity: 0;
+    }
+}
+.btn:disabled {
+    opacity: 1;
+    background: #e5e2ef;
+    color: #575b73;
+    box-shadow: none;
+}
+.question-map {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 26px;
+}
+.question-map button {
+    width: 39px;
+    height: 39px;
+    border-radius: 10px;
+    border: 1px solid #e1dcec;
+    background: #f8f6fc;
+    color: #555b75;
+    font-weight: 700;
+}
+.question-map button.answered {
+    background: #ede5ff;
+    color: #5933c7;
+}
+.question-map button.current {
+    border: 2px solid #6340d6;
+}
+.test-option {
+    width: 100%;
+    text-align: left;
+    background: #fff;
+    color: var(--ink);
+    font: inherit;
+}
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 70;
+    background: #24213c66;
+    backdrop-filter: blur(6px);
+    display: grid;
+    place-items: center;
+    padding: 20px;
+    animation: pageIn 0.25s ease;
+}
+.modal {
+    width: min(480px, 100%);
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    padding: 28px;
+    box-shadow: 0 24px 100px #20154633;
+}
+.modal p {
+    margin: 14px 0 24px;
+}
+.mobile-shade {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: #24213c55;
+    z-index: 19;
+}
+.progress-loading {
+    height: 6px;
+    overflow: hidden;
+    background: #eee8fa;
+    border-radius: 10px;
+    margin: 20px 0;
+}
+.progress-loading:after {
+    content: '';
+    display: block;
+    width: 40%;
+    height: 100%;
+    background: #7851e6;
+    animation: loading 1s ease-in-out infinite;
+}
+@keyframes loading {
+    from {
+        transform: translateX(-100%);
+    }
+    to {
+        transform: translateX(350%);
+    }
+}
+.paper-toolbar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.paper-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 260px;
+    gap: 22px;
+}
+.full-sheet {
+    max-width: 840px;
+    margin: auto;
+    padding: 42px;
+    min-height: 700px;
+}
+.full-sheet h3 {
+    font-size: 22px;
+}
+.full-sheet p {
+    font-size: 14px;
+    margin: 12px 0;
+}
+.full-sheet h4 {
+    font-size: 14px;
+    margin-top: 30px;
+}
+.tabset {
+    display: flex;
+    gap: 8px;
+    padding: 5px;
+    background: #eee9f8;
+    border-radius: 13px;
+}
+.tabset button {
+    border: 0;
+    background: transparent;
+    color: #5a5272;
+    padding: 11px 17px;
+    border-radius: 9px;
+    font-weight: 800;
+}
+.tabset button.active {
+    background: #fff;
+    color: #6340d6;
+    box-shadow: 0 3px 10px #34226212;
+}
+.help-grid {
+    grid-template-columns: repeat(3, 1fr);
+}
+.help-grid .step {
+    width: 36px;
+    height: 36px;
+    border-radius: 11px;
+    background: #efe8ff;
+    color: #6340d6;
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+    margin-bottom: 18px;
+}
+details {
+    border-bottom: 1px solid var(--line);
+    padding: 18px 0;
+}
+summary {
+    cursor: pointer;
+    font-weight: 700;
+    line-height: 1.5;
+}
+details p {
+    margin-top: 12px;
+}
+.search-results {
+    position: absolute;
+    top: 68px;
+    right: 110px;
+    max-width: 310px;
+    background: white;
+    border: 1px solid var(--line);
+    border-radius: 15px;
+    padding: 8px;
+    box-shadow: var(--shadow);
+    z-index: 30;
+}
+.search-results button {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    text-align: left;
+    background: white;
+    border: 0;
+    color: var(--ink);
+    border-radius: 9px;
+}
+.search-results button:hover {
+    background: #f2edff;
+}
+.table a {
+    color: #6340d6;
+}
+.summary-note {
+    padding: 12px 16px;
+    border: 1px solid #ddd0fc;
+    background: #f6f2ff;
+    border-radius: 12px;
+    color: #583598;
+    font-size: 12px;
+    line-height: 1.6;
+    margin-bottom: 22px;
+}
+.card-button {
+    text-align: left;
+    cursor: pointer;
+    color: var(--ink);
+    font: inherit;
+    width: 100%;
+}
+.card-button:hover {
+    transform: translateY(-4px);
+    border-color: #c5b4f2;
+}
+.toast {
+    max-width: calc(100vw - 32px);
+}
+body.comfortable {
+    font-size: 16px;
+}
+body.no-animations *,
+body.no-animations *:before,
+body.no-animations *:after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+}
+@media (max-width: 1000px) {
+    .paper-layout {
+        grid-template-columns: 1fr;
+    }
+    .help-grid {
+        grid-template-columns: 1fr;
+    }
+    .full-sheet {
+        padding: 26px;
+    }
+    .studio-preview {
+        position: static !important;
+    }
+}
+@media (max-width: 700px) {
+    .mobile-shade.show {
+        display: block;
+    }
+    .question-map {
+        gap: 6px;
+    }
+    .paper-toolbar {
+        width: 100%;
+    }
+    .paper-toolbar .btn {
+        flex: 1;
+    }
+    .full-sheet {
+        padding: 20px;
+    }
+    .testLive .flex {
+        flex-wrap: wrap;
+    }
+    .search-results {
+        right: 16px;
+        top: 62px;
+    }
+    .content {
+        overflow-wrap: anywhere;
+    }
+    .grid.stats .mini-card {
+        padding: 12px;
+    }
+    .sidebar {
+        overflow-y: auto;
+    }
+    .sidebar-bottom {
+        padding-top: 20px;
+    }
+    .brand {
+        padding-bottom: 15px;
+    }
+    .top-actions {
+        gap: 10px;
+    }
+    .profile {
+        padding-top: 14px;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+    .page.active,
+    .page.leaving {
+        animation: none !important;
+    }
+}
+
+:root {
+    --radius: 25px;
+    --shadow: 0 12px 38px rgba(67, 43, 133, 0.065);
+}
+body {
+    background:
+        radial-gradient(ellipse at 88% 0%, #eee7ff88, transparent 45%),
+        radial-gradient(ellipse at 0% 80%, #eaf2ff66, transparent 45%), #f8f9ff;
+}
+.card {
+    border-color: #e8e1f5;
+    border-radius: 25px;
+    background: linear-gradient(150deg, #fff 65%, #faf8ff);
+    box-shadow: var(--shadow);
+}
+.card:hover {
+    box-shadow: 0 18px 50px #51359212;
+}
+.mini-card {
+    border-radius: 19px;
+    background: linear-gradient(135deg, #faf7ff, #f5f7ff);
+}
+.btn {
+    border-radius: 14px;
+}
+.input {
+    border-radius: 14px;
+    border-color: #dcd5eb;
+    background: #fff;
+}
+.hero {
+    border-radius: 28px;
+    background: linear-gradient(115deg, #5933c8, #7450d9 65%, #6550c7);
+}
+.hero:after {
+    border-width: 28px;
+    width: 280px;
+    height: 280px;
+}
+.stat-icon {
+    background: linear-gradient(135deg, #eee4ff, #f5edff);
+    border-radius: 15px;
+}
+.stat {
+    position: relative;
+    overflow: hidden;
+}
+.stat:after {
+    content: '';
+    position: absolute;
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #eee7ff88, #e9f2ff33);
+    right: -30px;
+    bottom: -35px;
+    pointer-events: none;
+}
+.source-picker {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 24px 0 20px;
+}
+.source-choice {
+    position: relative;
+    padding: 20px 16px;
+    text-align: left;
+    border: 1.5px solid #ddd5ef;
+    border-radius: 19px;
+    background: #fff;
+    color: #20233d;
+    min-height: 148px;
+    transition:
+        transform 0.3s var(--ease),
+        box-shadow 0.3s,
+        border-color 0.3s,
+        background 0.3s;
+}
+.source-choice:hover {
+    transform: translateY(-3px);
+    border-color: #b49beb;
+    box-shadow: 0 10px 25px #6340d615;
+}
+.source-choice.selected {
+    border-color: #7953d8;
+    background: linear-gradient(135deg, #f3eaff, #edf0ff);
+    box-shadow: 0 5px 22px #6340d612;
+}
+.source-choice strong,
+.source-choice small {
+    display: block;
+}
+.source-choice strong {
+    margin: 10px 0 5px;
+    font-size: 14px;
+}
+.source-choice small {
+    color: #626780;
+    font-size: 11px;
+    line-height: 1.5;
+}
+.source-icon {
+    display: grid;
+    place-items: center;
+    width: 35px;
+    height: 35px;
+    border-radius: 11px;
+    background: #e6dcfc;
+    color: #5935bd;
+    font-size: 22px;
+}
+.source-badge {
+    position: absolute;
+    right: 10px;
+    top: 12px;
+    font-size: 9px;
+    background: #e9ddfc;
+    color: #563099;
+    padding: 5px 7px;
+    border-radius: 20px;
+    font-weight: 800;
+}
+.quiz-upload {
+    padding: 27px 15px;
+    background: linear-gradient(135deg, #fcfaff, #f1f3ff);
+    border-radius: 22px;
+}
+.upload-symbol {
+    width: 48px;
+    height: 48px;
+    margin: auto;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, #734bdd, #5840bd);
+    color: white;
+    border-radius: 16px;
+    font-size: 26px;
+    box-shadow: 0 8px 20px #6843c72b;
+}
+.topic-note {
+    padding: 13px 16px;
+    background: linear-gradient(120deg, #f2ebff, #eef4ff);
+    border-radius: 14px;
+    color: #574975;
+    line-height: 1.7;
+    font-size: 12px;
+    margin-top: 12px;
+}
+.nav button {
+    border-radius: 14px;
+}
+.nav button.active {
+    background: linear-gradient(100deg, #eee5ff, #f3eeff);
+    box-shadow: inset 3px 0 #7952d9;
+}
+.upload {
+    border-radius: 22px;
+}
+.modal {
+    border-radius: 27px;
+}
+.test-option {
+    border-radius: 17px;
+}
+.test-option.selected {
+    background: linear-gradient(110deg, #efe6ff, #f2efff);
+}
+.preview-sheet {
+    border-radius: 16px;
+}
+.topbar {
+    background: linear-gradient(100deg, #ffffffeb, #f9f6ffeb);
+}
+@media (max-width: 700px) {
+    .source-choice {
+        padding: 15px 12px;
+        min-height: 150px;
+    }
+    .source-badge {
+        position: static;
+        display: inline-block;
+        margin-top: 8px;
+    }
+    .source-choice small {
+        font-size: 11px;
+    }
+}
+
+/* Dashboard finish: purple hero with mint, coral and sky accents. */
+body {
+    background: #f2f3f8;
+}
+.main {
+    background:
+        radial-gradient(ellipse at 96% 6%, #e8dfff66, transparent 40%),
+        radial-gradient(ellipse at 8% 85%, #e1f4f155, transparent 40%), #f3f4f9;
+}
+.topbar {
+    background: #ffffffde;
+}
+.content {
+    padding-top: 30px;
+}
+.card {
+    border: 1px solid #e6e7ef;
+    background: #fff;
+    box-shadow: 0 6px 25px #25204606;
+}
+.ai-banner {
+    position: relative;
+    isolation: isolate;
+    min-height: 260px;
+    padding: 34px 38px;
+    margin-bottom: 26px;
+    border: 1px solid #8e6bf5;
+    border-radius: 28px;
+    background: linear-gradient(
+        116deg,
+        #7042d8 0%,
+        #6941d9 42%,
+        #7451e4 76%,
+        #8661e9 100%
+    );
+    box-shadow: 0 16px 35px #6743c924;
+    overflow: hidden;
+}
+.ai-banner:before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    width: 360px;
+    height: 360px;
+    border-radius: 80px;
+    left: 32%;
+    top: -205px;
+    border: 1px solid #ffffff25;
+    transform: rotate(32deg);
+    background: linear-gradient(135deg, #ffffff16, transparent);
+}
+.ai-banner:after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    width: 410px;
+    height: 410px;
+    right: -145px;
+    top: -195px;
+    border: 70px solid #ffffff12;
+    border-radius: 50%;
+}
+.banner-copy {
+    position: relative;
+    z-index: 2;
+    flex: 1;
+}
+.banner-kicker {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.7px;
+    color: #fff;
+    margin-bottom: 15px;
+}
+.banner-kicker > span {
+    font-size: 18px;
+}
+.ai-banner h2 {
+    font-size: 31px;
+    line-height: 1.25;
+    letter-spacing: -1px;
+    font-weight: 800;
+    color: #fff;
+}
+.ai-banner p {
+    font-size: 13px;
+    color: #fff;
+    line-height: 1.65;
+    margin-top: 12px;
+}
+.banner-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+.ai-banner .banner-primary {
+    background: #fff;
+    color: #5530b3;
+    margin-top: 0;
+    box-shadow: 0 7px 18px #3e217b22;
+    padding: 12px 18px;
+}
+.ai-banner .banner-secondary {
+    background: #ffffff12;
+    color: #fff;
+    border: 1px solid #ffffff77;
+    margin-top: 0;
+    padding: 12px 16px;
+}
+.ai-banner .banner-secondary:hover {
+    background: #ffffff25;
+}
+.banner-visual {
+    width: 320px;
+    height: 210px;
+    flex-shrink: 0;
+    position: relative;
+    display: grid;
+    place-items: center;
+    padding: 0 12px;
+    z-index: 1;
+}
+.ai-paper-card {
+    background: #fff;
+    color: #23233e;
+    border: 1px solid #e8dcff;
+    border-radius: 19px;
+    width: 280px;
+    padding: 17px;
+    box-shadow: 0 18px 40px #35167840;
+    transform: rotate(-3deg);
+    animation: paperDrift 7s ease-in-out infinite;
+}
+.ai-card-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+}
+.ai-small-mark {
+    display: grid;
+    place-items: center;
+    background: #eee6ff;
+    color: #6540d0;
+    width: 27px;
+    height: 27px;
+    border-radius: 9px;
+    font-size: 18px;
+}
+.ai-card-dots {
+    margin-left: auto;
+    color: #675f80;
+    letter-spacing: 2px;
+}
+.ai-card-message {
+    display: flex;
+    gap: 9px;
+    background: #f5f1fc;
+    border-radius: 12px;
+    padding: 12px;
+    margin-top: 15px;
+}
+.ai-bubble-icon {
+    color: #6d48c9;
+    font-size: 22px;
+}
+.ai-card-message strong {
+    font-size: 10px;
+    display: block;
+    line-height: 1.4;
+    color: #332646;
+}
+.ai-card-message small {
+    display: block;
+    font-size: 9px;
+    color: #655b76;
+    margin-top: 5px;
+}
+.ai-demo-lines {
+    display: grid;
+    gap: 7px;
+    padding: 14px 4px;
+}
+.ai-demo-lines span {
+    height: 5px;
+    border-radius: 4px;
+    background: #e8e2f1;
+    width: 100%;
+}
+.ai-demo-lines span:nth-child(2) {
+    width: 84%;
+}
+.ai-demo-lines span:nth-child(3) {
+    width: 65%;
+    background: #cfc0f4;
+}
+.ai-card-footer {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    border-top: 1px solid #eee8f5;
+    padding-top: 10px;
+    color: #5c4a7b;
+    font-size: 9px;
+    font-weight: 700;
+}
+.ai-card-footer > span:last-child {
+    margin-left: auto;
+    font-size: 15px;
+}
+.ai-preview-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #247861;
+}
+.banner-spark {
+    position: absolute;
+    color: #d7c4ff;
+    font-size: 86px;
+    z-index: -1;
+    line-height: 1;
+}
+.spark-one {
+    left: -32px;
+    top: 23px;
+    transform: rotate(15deg);
+}
+.spark-two {
+    right: -5px;
+    bottom: -5px;
+    font-size: 64px;
+}
+.banner-float-tag {
+    position: absolute;
+    bottom: -9px;
+    right: 5px;
+    background: #fff;
+    border: 1px solid #ede5ff;
+    color: #403152;
+    border-radius: 13px;
+    padding: 10px 14px;
+    font-weight: 700;
+    font-size: 10px;
+    box-shadow: 0 10px 22px #34176930;
+    transform: rotate(3deg);
+}
+.banner-float-tag span {
+    display: inline-grid;
+    place-items: center;
+    width: 21px;
+    height: 21px;
+    border-radius: 7px;
+    margin-right: 7px;
+    background: #e1f5eb;
+    color: #20684e;
+}
+.stats {
+    gap: 17px;
+}
+.stats > .stat {
+    border-radius: 23px;
+    border: 1px solid #e0d9f2;
+    background: linear-gradient(130deg, #f4ecff, #fdfbff);
+}
+.stats > .stat:nth-child(2) {
+    border-color: #cde4f6;
+    background: linear-gradient(130deg, #eaf5ff, #fbfdff);
+}
+.stats > .stat:nth-child(3) {
+    border-color: #cde9df;
+    background: linear-gradient(130deg, #e6f7ef, #f9fffb);
+}
+.stats > .stat:nth-child(4) {
+    border-color: #f3d8d8;
+    background: linear-gradient(130deg, #fff0ed, #fffafa);
+}
+.stat:after {
+    background: #ffffff66;
+}
+.stat-icon.blue {
+    background: #d7eafa;
+    color: #285d93;
+}
+.stat-icon.green {
+    background: #d0ebdf;
+    color: #236c53;
+}
+.stat-icon.orange {
+    background: #fce0db;
+    color: #a24442;
+}
+.stat small {
+    color: #515970;
+}
+.quick-list .tile {
+    border-radius: 17px;
+    background: linear-gradient(105deg, #f5efff, #fdfbff);
+    border-color: #e8ddfa;
+}
+.quick-list .tile:nth-child(2) {
+    background: linear-gradient(105deg, #eaf7f0, #fbfffd);
+    border-color: #d4ebdf;
+}
+.quick-list .tile:nth-child(3) {
+    background: linear-gradient(105deg, #fff0ed, #fffcfb);
+    border-color: #f3ddd6;
+}
+.quick-list .tile:nth-child(2) .tile-icon {
+    background: #d8eee2;
+    color: #24674e;
+}
+.quick-list .tile:nth-child(3) .tile-icon {
+    background: #f9ddd5;
+    color: #9b4b37;
+}
+.quick-list .tile:hover {
+    transform: translateX(4px);
+    box-shadow: 0 7px 20px #36205a09;
+}
+.mini-card {
+    background: linear-gradient(135deg, #f6f2fc, #fafaff);
+}
+#page-performance .two > .card:last-child .mini-card:first-of-type {
+    background: #edf8f2;
+    border-color: #d7ebdf;
+}
+#page-performance .two > .card:last-child .mini-card:last-of-type {
+    background: #fff2ed;
+    border-color: #f2dfd5;
+}
+#page-help .help-grid > .card:nth-child(2) {
+    background: linear-gradient(150deg, #eff9f4, #fff);
+}
+#page-help .help-grid > .card:nth-child(3) {
+    background: linear-gradient(150deg, #fff2ed, #fff);
+}
+#testSetup > .card:last-child {
+    background:
+        radial-gradient(circle at 100% 0%, #dcecfb88, transparent 50%),
+        linear-gradient(150deg, #f0e9ff, #faf8ff 60%, #eef7f4) !important;
+}
+#testSetup > .card:last-child .mini-card {
+    background: #ffffffc9;
+}
+.sidebar-bottom {
+    padding-top: 24px;
+}
+.profile {
+    border-top-color: #e9e6ef;
+}
+.card.stat .tag {
+    background: #ffffffa8 !important;
+}
+.round {
+    background: #fff;
+}
+.table tbody tr:hover {
+    background: #faf8ff;
+}
+@keyframes paperDrift {
+    0%,
+    100% {
+        transform: translateY(0) rotate(-3deg);
+    }
+    50% {
+        transform: translateY(-6px) rotate(-1deg);
+    }
+}
+@media (max-width: 1100px) {
+    .ai-banner {
+        padding: 30px;
+    }
+    .ai-banner h2 {
+        font-size: 27px;
+    }
+    .banner-visual {
+        width: 255px;
+    }
+    .ai-paper-card {
+        width: 235px;
+    }
+    .banner-float-tag {
+        right: -5px;
+        font-size: 9px;
+    }
+}
+@media (max-width: 850px) {
+    .ai-banner {
+        gap: 10px;
+    }
+    .banner-visual {
+        width: 220px;
+    }
+    .ai-paper-card {
+        width: 210px;
+        padding: 12px;
+    }
+    .ai-banner h2 {
+        font-size: 24px;
+    }
+    .banner-kicker {
+        font-size: 9px;
+        letter-spacing: 1px;
+    }
+}
+@media (max-width: 700px) {
+    .ai-banner {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 26px;
+        gap: 25px;
+    }
+    .ai-banner h2 {
+        font-size: 28px;
+    }
+    .banner-visual {
+        width: 100%;
+        height: 205px;
+    }
+    .ai-paper-card {
+        width: 260px;
+        padding: 16px;
+    }
+    .banner-float-tag {
+        right: 0;
+        bottom: -5px;
+    }
+    .spark-one {
+        left: 0;
+    }
+    .stats {
+        gap: 12px;
+    }
+    .stat .tag {
+        font-size: 10px;
+        padding: 4px 6px;
+    }
+    .banner-actions {
+        gap: 8px;
+    }
+    .banner-actions .btn {
+        padding: 11px 13px;
+        font-size: 12px;
+    }
+}
+.login-button {
+    background: linear-gradient(115deg, #7047d9, #5935c5);
+    color: #fff;
+    border: 1px solid #6940c9;
+    box-shadow: 0 5px 14px #6336c31f;
+    padding: 10px 15px;
+    white-space: nowrap;
+    gap: 8px;
+}
+.login-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px #6336c335;
+}
+.login-button:focus-visible {
+    outline-color: #7047d9;
+}
+.login-button svg {
+    flex-shrink: 0;
+}
+@media (max-width: 700px) {
+    .login-button {
+        padding: 9px 12px;
+        font-size: 12px;
+        min-height: 40px;
+    }
+    .top-actions {
+        gap: 8px;
+    }
+}
+/* Final typography, interaction and empty-state pass. */
+:root {
+    --ink: #24243c;
+    --muted: #626780;
+    --line: #e7e5ef;
+}
+body {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+h1 {
+    font-weight: 800;
+    line-height: 1.25;
+    letter-spacing: -1.1px;
+}
+h2 {
+    line-height: 1.35;
+}
+p {
+    line-height: 1.75;
+}
+.ui-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+.stat-icon .ui-icon,
+.tile-icon .ui-icon {
+    width: 22px;
+    height: 22px;
+}
+.brandmark {
+    background: linear-gradient(145deg, #8765e9, #6340ce);
+}
+.nav {
+    gap: 6px;
+}
+.nav button {
+    min-height: 46px;
+    padding: 12px 14px;
+    position: relative;
+}
+.nav button.active {
+    color: #5731bd;
+}
+.nav button:hover {
+    transform: translateX(2px);
+}
+.btn,
+.pill,
+.round {
+    transition:
+        transform 0.24s var(--ease),
+        box-shadow 0.3s var(--ease),
+        background 0.25s,
+        color 0.25s,
+        border-color 0.25s;
+}
+.btn:active,
+.pill:active,
+.round:active {
+    transform: scale(0.975) !important;
+}
+.btn:focus-visible,
+.nav button:focus-visible {
+    outline: 3px solid #9c7bea;
+    outline-offset: 3px;
+}
+.card {
+    transition:
+        transform 0.35s var(--ease),
+        box-shadow 0.35s var(--ease),
+        border-color 0.35s;
+}
+.card.stat:hover {
+    transform: translateY(-3px);
+}
+.stats .num {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -1px;
+}
+.section-head {
+    gap: 12px;
+}
+.section-head h2 {
+    font-size: 18px;
+}
+.chart-empty {
+    height: 100%;
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 25px;
+    background: linear-gradient(180deg, #fbf9ff, #fff);
+    border: 1px dashed #dcd3ee;
+    border-radius: 18px;
+}
+.empty-symbol {
+    width: 48px;
+    height: 48px;
+    border-radius: 15px;
+    background: #eee6fa;
+    display: grid;
+    place-items: center;
+    color: #6540c7;
+    margin-bottom: 14px;
+}
+.chart-empty h3 {
+    font-size: 15px;
+    color: #34324c;
+    margin-bottom: 4px;
+}
+.chart-empty p {
+    font-size: 12px;
+    max-width: 290px;
+}
+.chart-empty .btn {
+    margin-top: 15px;
+    font-size: 12px;
+    min-height: 38px;
+}
+.stat .tag {
+    color: #535970 !important;
+    font-size: 10px;
+}
+.activity-empty {
+    padding: 26px;
+    text-align: center;
+    color: #626780;
+}
+.insight-chip {
+    border-radius: 10px;
+    display: inline-block;
+    padding: 6px 9px;
+    background: #edf7f1;
+    color: #23674d;
+    font-size: 11px;
+    font-weight: 700;
+}
+.table th {
+    letter-spacing: 0.8px;
+    font-size: 10px;
+}
+.table td {
+    font-size: 13px;
+}
+.paper-toolbar .btn {
+    white-space: nowrap;
+}
+.topbar .breadcrumb {
+    font-size: 13px;
+}
+.content > .page > .pagehead {
+    margin-bottom: 25px;
+}
+.footer-note {
+    color: #626780;
+    font-size: 11px;
+}
+.tile:focus-visible {
+    outline: 3px solid #9c7bea;
+    outline-offset: 3px;
+}
+.test-option:focus-visible {
+    outline: 3px solid #9c7bea;
+    outline-offset: 3px;
+}
+.toast {
+    font-size: 13px;
+    line-height: 1.5;
+    box-shadow: 0 12px 34px #24203c30;
+}
+.progress > div {
+    transition: width 0.7s var(--ease);
+}
+@media (max-width: 700px) {
+    h1 {
+        font-size: 24px;
+    }
+    .section-head {
+        flex-wrap: wrap;
+    }
+    .stats .num {
+        font-size: 25px;
+    }
+    .chart-empty {
+        min-height: 220px;
+    }
+    .nav button {
+        min-height: 44px;
+    }
+    .table td {
+        font-size: 12px;
+    }
+    .ai-banner {
+        margin-bottom: 20px;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .ai-paper-card {
+        animation: none !important;
+    }
+    .card.stat:hover {
+        transform: none;
+    }
+}
+.brandmark {
+    background: linear-gradient(135deg, #f0e7ff, #e5dcfb);
+    color: #653cc9;
+    box-shadow: none;
+    border: 1px solid #ded1f5;
+    border-radius: 12px;
+    width: 39px;
+    height: 39px;
+    flex-shrink: 0;
+}
+.brandmark svg {
+    display: block;
+}
+.account-settings-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 22px;
+    max-width: 1100px;
+}
+.account-profile {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 8px 0 20px;
+}
+.account-profile .avatar {
+    width: 50px;
+    height: 50px;
+    font-size: 19px;
+    border-radius: 16px;
+}
+.account-profile strong {
+    font-size: 16px;
+}
+.account-detail {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 16px 0;
+    border-top: 1px solid var(--line);
+    font-size: 13px;
+}
+.account-detail > span {
+    color: #626780;
+}
+.account-detail > strong {
+    font-size: 12px;
+}
+.login-form {
+    display: grid;
+    gap: 15px;
+    margin-top: 22px;
+}
+.login-form .field {
+    gap: 7px;
+}
+.login-form-note {
+    font-size: 12px;
+    background: #f6f1ff;
+    color: #5d4a78;
+    padding: 12px 14px;
+    border-radius: 12px;
+    line-height: 1.6;
+}
+.login-form .btn:disabled {
+    color: #52576e;
+    background: #e6e1ee;
+}
+.login-form .field label {
+    font-size: 12px;
+    font-weight: 700;
+}
+.account-settings-grid p {
+    max-width: 430px;
+}
+@media (max-width: 900px) {
+    .account-settings-grid {
+        grid-template-columns: 1fr;
+    }
+    .account-detail {
+        flex-wrap: wrap;
+    }
+}
+
+/* Generation controls */
+.source-files{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:12px;margin-top:14px}.source-file{border:1px solid #ded8eb;border-radius:13px;padding:10px;background:#fff;min-width:0}.source-file img{width:100%;height:100px;object-fit:contain;background:#f6f3fa;border-radius:8px}.source-file strong{display:block;overflow-wrap:anywhere;font-size:12px;color:#302642;margin:8px 0}.source-file button{font-size:12px;padding:6px 10px}.generation-status{color:#463565;background:#f5f0ff;border-radius:12px;padding:12px 14px;line-height:1.6;margin:12px 0;overflow-wrap:anywhere}.generation-status:empty{display:none}.source-ref{color:#504963;font-size:12px}button:disabled{cursor:wait}.preview-sheet p{white-space:pre-wrap}
+
+/* Generation controls */
+
+    .generation-status { border: 1px solid #ded3f4; color: #392a58; }
+    .generation-status[data-phase="error"] { background: #fff2f2; border-color: #e9b8bf; color: #8b2637; }
+    .generation-status[data-phase="success"] { background: #edf9f1; border-color: #b9ddc6; color: #185c38; }
+    .generation-status[hidden] { display: none; }
+    .generation-status-row { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+    .generation-status-message { flex: 1; min-width: 150px; font-weight: 700; }
+    .generation-elapsed { font-size: 12px; color: #54436e; }
+    .generation-spinner { display: inline-block; width: 17px; height: 17px; border: 2px solid #b9a9de; border-top-color: #5930b9; border-radius: 50%; animation: generation-spin .8s linear infinite; flex-shrink: 0; }
+    #generateButton .generation-spinner { border-color: #ada0c9; border-top-color: #442174; }
+    .draft-note { color: #57416e !important; background: #f5f0fc; border-radius: 8px; padding: 10px; }
+    .draft-question { color: #5c536b !important; padding: 9px 0; border-bottom: 1px dashed #ded6ea; }
+    .draft-summary { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 12px; margin: 10px 0; color: #4e3b68; }
+    @keyframes generation-spin { to { transform: rotate(360deg); } }
+    @media(prefers-reduced-motion: reduce) { .generation-spinner { animation: none; } }
+
+
+@keyframes drawLine { to { stroke-dashoffset: 0; } }
+
+        </style>
+    </head>
+    <body>
+        <!-- EDIT H2: sidebar, navigation and page text -->
+        <div class="app">
+            <aside class="sidebar" id="sidebar">
+                <div class="brand">
+                    <span class="brandmark" aria-hidden="true"
+                        ><svg
+                            viewBox="0 0 24 24"
+                            width="27"
+                            height="27"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
+                            <path d="m2 9 10-5 10 5-10 5z" />
+                            <path d="M6 11v6c3.5 3 8.5 3 12 0v-6M22 9v7" />
+                            <circle cx="22" cy="18" r="1" /></svg></span
+                    ><span>ExamCraft <em>AI</em></span>
+                </div>
+                <div class="nav-label">Workspace</div>
+                <nav class="nav" id="nav">
+                    <button class="active" data-page="dashboard">
+                        <svg
+                            class="ui-icon"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.7"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            aria-hidden="true"
+                        >
+                            <rect x="3" y="3" width="7" height="7" rx="2" />
+                            <rect x="14" y="3" width="7" height="7" rx="2" />
+                            <rect x="3" y="14" width="7" height="7" rx="2" />
+                            <rect x="14" y="14" width="7" height="7" rx="2" /></svg
+                        ><span>Dashboard</span></button
+                    ><button data-page="create">
+                        <svg
+                            class="ui-icon"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.7"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            aria-hidden="true"
+                        >
+                            <path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" />
+                            <path d="M14 3v6h6M8 13h8M8 17h5" /></svg
+                        ><span>Create Paper</span></button
+                    ><button data-page="test">
+                        <svg
+                            class="ui-icon"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.7"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            aria-hidden="true"
+                        >
+                            <circle cx="12" cy="12" r="9" />
+                            <circle cx="12" cy="12" r="5" />
+                            <circle cx="12" cy="12" r="1" /></svg
+                        ><span>Online Test</span></button
+                    ><button data-page="papers">
+                        <svg
+                            class="ui-icon"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.7"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            aria-hidden="true"
+                        >
+                            <path
+                                d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
+                            /></svg
+                        ><span>My Papers</span></button
+                    ><button data-page="history">
+                        <svg
+                            class="ui-icon"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.7"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            aria-hidden="true"
+                        >
+                            <path d="M3 10a9 9 0 1 1 1.5 7M3 4v6h6M12 7v5l3 2" /></svg
+                        ><span>Test History</span></button
+                    ><button data-page="performance">
+                        <svg
+                            class="ui-icon"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.7"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            aria-hidden="true"
+                        >
+                            <path d="M4 4v16h16M8 15l4-5 4 2 5-7" /></svg
+                        ><span>Performance</span>
+                    </button>
+                </nav>
+                <div class="nav-label" style="margin-top: 30px">Preferences</div>
+                <nav class="nav">
+                    <button data-page="help">
+                        <svg
+                            class="ui-icon"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.7"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            aria-hidden="true"
+                        >
+                            <circle cx="12" cy="12" r="9" />
+                            <path d="M9.5 9a2.5 2.5 0 1 1 4 2c-1.5 1-1.5 1-1.5 3M12 17h.01" /></svg
+                        ><span>Help & Guide</span></button
+                    ><button data-page="settings">
+                        <svg
+                            class="ui-icon"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.7"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            aria-hidden="true"
+                        >
+                            <path d="M4 7h16M4 17h16" />
+                            <circle cx="9" cy="7" r="3" fill="white" />
+                            <circle cx="15" cy="17" r="3" fill="white" /></svg
+                        ><span>Settings</span>
+                    </button>
+                </nav>
+                <div class="sidebar-bottom">
+                    <div class="profile">
+                        <div class="avatar">S</div>
+                        <div>
+                            <strong>Student Workspace</strong><br /><small
+                                >Your study workspace</small
+                            >
+                        </div>
+                    </div>
+                </div>
+            </aside>
+            <main class="main">
+                <header class="topbar">
+                    <div class="flex">
+                        <button
+                            class="round mobile-menu"
+                            onclick="document.getElementById('sidebar').classList.toggle('open')"
+                        >
+                            ☰</button
+                        ><span class="breadcrumb" id="breadcrumb">Dashboard</span>
+                    </div>
+                    <div class="top-actions">
+                        <label class="search"
+                            >⌕
+                            <input
+                                placeholder="Search your workspace"
+                                id="search"
+                                oninput="searchPages(this.value)" /></label
+                        ><button
+                            class="round"
+                            aria-label="Notifications"
+                            title="Notifications"
+                            onclick="toast('You are all caught up!')"
+                        >
+                            <svg
+                                class="ui-icon"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="1.7"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                aria-hidden="true"
+                            >
+                                <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" />
+                            </svg></button
+                        ><button
+                            class="btn login-button"
+                            aria-label="Login"
+                            onclick="showLoginPlaceholder()"
+                        >
+                            <svg
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="1.8"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                aria-hidden="true"
+                            >
+                                <path d="M14 4h5a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-5" />
+                                <path d="M3 12h12m-4-4 4 4-4 4" /></svg
+                            ><span>Login</span>
+                        </button>
+                    </div>
+                </header>
+                <div class="content">
+                    <section class="page active" id="page-dashboard">
+                        <div class="pagehead">
+                            <div>
+                                <div class="eyebrow">YOUR LEARNING SPACE ✦</div>
+                                <h1>Your next exam starts here.</h1>
+                                <p>A calm space to create, practice, and see your progress.</p>
+                            </div>
+                            <button class="btn primary" onclick="navigate('create')">
+                                ＋ Create Question Paper
+                            </button>
+                        </div>
+                        <div class="hero ai-banner">
+                            <div class="banner-copy">
+                                <div class="banner-kicker">
+                                    <span>✦</span> YOUR AI STUDY WORKSPACE
+                                </div>
+                                <h2>Turn your notes into<br />your next breakthrough.</h2>
+                                <p>
+                                    Create a practice paper. Challenge yourself.<br />Build
+                                    confidence, one question at a time.
+                                </p>
+                                <div class="banner-actions">
+                                    <button class="btn banner-primary" onclick="navigate('create')">
+                                        Create a Paper <span>↗</span></button
+                                    ><button
+                                        class="btn banner-secondary"
+                                        onclick="navigate('test')"
+                                    >
+                                        Practice MCQs →
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="banner-visual" aria-hidden="true">
+                                <span class="banner-spark spark-one">✦</span
+                                ><span class="banner-spark spark-two">✧</span>
+                                <div class="ai-paper-card">
+                                    <div class="ai-card-head">
+                                        <span class="ai-small-mark">✦</span><b>ExamCraft Studio</b
+                                        ><span class="ai-card-dots">•••</span>
+                                    </div>
+                                    <div class="ai-card-message">
+                                        <span class="ai-bubble-icon">▤</span>
+                                        <div>
+                                            <strong>Your notes. A fresh perspective.</strong
+                                            ><small>Personalized practice starts here.</small>
+                                        </div>
+                                    </div>
+                                    <div class="ai-demo-lines">
+                                        <span></span><span></span><span></span>
+                                    </div>
+                                    <div class="ai-card-footer">
+                                        <span class="ai-preview-dot"></span> Paper & quiz workspace
+                                        <span>↗</span>
+                                    </div>
+                                </div>
+                                <div class="banner-float-tag">
+                                    <span>✓</span> Ready for your next exam
+                                </div>
+                            </div>
+                        </div>
+                        <div class="grid stats">
+                            <div class="card stat fade-up">
+                                <div class="stat-top">
+                                    <div class="stat-icon">
+                                        <svg
+                                            class="ui-icon"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            stroke-width="1.7"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            aria-hidden="true"
+                                        >
+                                            <path
+                                                d="M8 3h8v6a4 4 0 0 1-8 0zM8 5H4v2a4 4 0 0 0 4 4M16 5h4v2a4 4 0 0 1-4 4M12 13v5M8 21h8M9 18h6v3H9z"
+                                            />
+                                        </svg>
+                                    </div>
+                                    <span class="tag">↗ 12%</span>
+                                </div>
+                                <small>Highest Score</small>
+                                <div class="num">24</div>
+                            </div>
+                            <div class="card stat fade-up">
+                                <div class="stat-top">
+                                    <div class="stat-icon blue">
+                                        <svg
+                                            class="ui-icon"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            stroke-width="1.7"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            aria-hidden="true"
+                                        >
+                                            <circle cx="12" cy="12" r="9" />
+                                            <circle cx="12" cy="12" r="5" />
+                                            <circle cx="12" cy="12" r="1" />
+                                        </svg>
+                                    </div>
+                                    <span class="tag">↗ 8%</span>
+                                </div>
+                                <small>Tests Completed</small>
+                                <div class="num">18</div>
+                            </div>
+                            <div class="card stat fade-up">
+                                <div class="stat-top">
+                                    <div class="stat-icon green">
+                                        <svg
+                                            class="ui-icon"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            stroke-width="1.7"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            aria-hidden="true"
+                                        >
+                                            <path d="M4 4v16h16M8 15l4-5 4 2 5-7" />
+                                        </svg>
+                                    </div>
+                                    <span class="tag">↗ 6%</span>
+                                </div>
+                                <small>Average Score</small>
+                                <div class="num">78<span style="font-size: 17px">%</span></div>
+                            </div>
+                            <div class="card stat fade-up">
+                                <div class="stat-top">
+                                    <div class="stat-icon orange">✧</div>
+                                    <span class="tag">+ 2 days</span>
+                                </div>
+                                <small>Study Streak</small>
+                                <div class="num">7 <span style="font-size: 16px">days</span></div>
+                            </div>
+                        </div>
+                        <div class="grid two">
+                            <div class="card">
+                                <div class="section-head">
+                                    <div>
+                                        <h2>Performance Overview</h2>
+                                        <p>Your test scores over time</p>
+                                    </div>
+                                    <button class="pill" onclick="navigate('performance')">
+                                        View Analytics ↗
+                                    </button>
+                                </div>
+                                <div id="dashboardChart" class="chartwrap"></div>
+                                <div class="chart-labels">
+                                    <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span
+                                    ><span>Fri</span><span>Sat</span><span>Sun</span>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="section-head">
+                                    <h2>Quick Actions</h2>
+                                    <span style="color: #b8a9fb">✦</span>
+                                </div>
+                                <div class="quick-list">
+                                    <div class="tile" onclick="navigate('create')">
+                                        <div class="tile-icon">
+                                            <svg
+                                                class="ui-icon"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                stroke-width="1.7"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                aria-hidden="true"
+                                            >
+                                                <path
+                                                    d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"
+                                                />
+                                                <path d="M14 3v6h6M8 13h8M8 17h5" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <strong>Generate Paper</strong>
+                                            <p>Create custom practice questions</p>
+                                        </div>
+                                        <span style="margin-left: auto; color: #aaa">→</span>
+                                    </div>
+                                    <div class="tile" onclick="navigate('test')">
+                                        <div class="tile-icon">
+                                            <svg
+                                                class="ui-icon"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                stroke-width="1.7"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                aria-hidden="true"
+                                            >
+                                                <circle cx="12" cy="12" r="9" />
+                                                <circle cx="12" cy="12" r="5" />
+                                                <circle cx="12" cy="12" r="1" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <strong>Take MCQ Test</strong>
+                                            <p>Practice with a timed quiz</p>
+                                        </div>
+                                        <span style="margin-left: auto; color: #aaa">→</span>
+                                    </div>
+                                    <div class="tile" onclick="navigate('performance')">
+                                        <div class="tile-icon">
+                                            <svg
+                                                class="ui-icon"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                stroke-width="1.7"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                aria-hidden="true"
+                                            >
+                                                <path d="M4 4v16h16M8 15l4-5 4 2 5-7" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <strong>View Progress</strong>
+                                            <p>Explore your learning insights</p>
+                                        </div>
+                                        <span style="margin-left: auto; color: #aaa">→</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card" style="margin-top: 20px">
+                            <div class="section-head">
+                                <h2>Recent Activity</h2>
+                                <a onclick="navigate('papers')">View all →</a>
+                            </div>
+                            <div style="overflow-x: auto">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>SUBJECT</th>
+                                            <th>TYPE</th>
+                                            <th>DATE</th>
+                                            <th>SCORE</th>
+                                            <th>STATUS</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><b>Data Structures</b></td>
+                                            <td>MCQ Test</td>
+                                            <td>Today</td>
+                                            <td class="score">85%</td>
+                                            <td><span class="status">Completed</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><b>Operating Systems</b></td>
+                                            <td>Question Paper</td>
+                                            <td>Yesterday</td>
+                                            <td>—</td>
+                                            <td><span class="status">Created</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><b>Python Programming</b></td>
+                                            <td>MCQ Test</td>
+                                            <td>Oct 10</td>
+                                            <td class="score">76%</td>
+                                            <td><span class="status">Completed</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <p class="footer-note">
+                            Your activity in this browser · Metrics update after you save a paper or
+                            complete a test.
+                        </p>
+                    </section>
+                    <!-- EDIT PAGE CREATE: Paper details, default values and question counts -->
+                    <section class="page" id="page-create">
+                        <div class="pagehead">
+                            <div>
+                                <div class="eyebrow">CREATE & PRACTICE</div>
+                                <h1>Question Paper Studio</h1>
+                                <p>Set up your paper exactly how you want it.</p>
+                            </div>
+                            <button class="btn outline" onclick="navigate('papers')">
+                                My Papers →
+                            </button>
+                        </div>
+                        <div class="split">
+                            <div class="grid">
+                                <div class="card">
+                                    <div class="section-head">
+                                        <h2>01 · Study Material</h2>
+                                        <span class="pill">PDF only</span>
+                                    </div>
+                                    <div
+                                        class="upload"
+                                        id="upload"
+                                        onclick="document.getElementById('pdfFile').click()"
+                                        ondragover="
+                                            event.preventDefault();
+                                            this.classList.add('drag');
+                                        "
+                                        ondragleave="this.classList.remove('drag')"
+                                        ondrop="handleDrop(event)"
+                                    >
+                                        <div class="bigicon">☁️</div>
+                                        <strong id="fileLabel"
+                                            >Click to upload your study PDF</strong
+                                        >
+                                        <p>Or drag and drop a file here · Max 50 MB</p>
+                                        <input
+                                            type="file"
+                                            id="pdfFile"
+                                            accept="application/pdf"
+                                            hidden
+                                            onchange="fileChosen(this.files[0])"
+                                        />
+                                    </div>
+                                    <p class="footer-note">
+                                        Prototype only: PDF content is not processed or uploaded
+                                        anywhere.
+                                    </p>
+                                </div>
+                                <div class="card">
+                                    <div class="section-head"><h2>02 · Paper Details</h2></div>
+                                    <div class="form-grid">
+                                        <div class="field">
+                                            <label>Subject name</label
+                                            ><input
+                                                class="input"
+                                                id="subject"
+                                                value="Data Structures"
+                                                oninput="updatePreview()"
+                                                placeholder="e.g. Data Structures"
+                                            />
+                                        </div>
+                                        <div class="field">
+                                            <label for="duration">Duration (minutes)</label
+                                            ><input
+                                                class="input"
+                                                id="duration"
+                                                type="number"
+                                                min="1"
+                                                max="600"
+                                                value="60"
+                                            />
+                                        </div>
+                                        <div class="field">
+                                            <label for="difficulty">Difficulty</label
+                                            ><select id="difficulty" class="input">
+                                                <option>Balanced</option>
+                                                <option>Easy</option>
+                                                <option>Moderate</option>
+                                                <option>Challenging</option>
+                                            </select>
+                                        </div>
+                                        <div class="field">
+                                            <label>Total marks</label
+                                            ><input
+                                                class="input"
+                                                id="marks"
+                                                type="number"
+                                                min="1"
+                                                value="50"
+                                                oninput="updatePreview()"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card">
+                                    <div class="section-head">
+                                        <h2>03 · Question Types</h2>
+                                        <span class="muted small">Set 0 to skip a section</span>
+                                    </div>
+                                    <div id="counters"></div>
+                                    <div class="flex between" style="margin-top: 18px">
+                                        <strong>Total Questions</strong
+                                        ><strong
+                                            style="font-size: 22px; color: var(--purple)"
+                                            id="totalQuestions"
+                                            >25</strong
+                                        >
+                                    </div>
+                                </div>
+                                <button
+                                    class="btn primary"
+                                    style="width: 100%; padding: 16px"
+                                    id="generateButton"
+                                    onclick="generatePaper()"
+                                >
+                                    ✦ Build Demo Paper →
+                                </button>
+                            </div>
+                            <div
+                                class="card studio-preview"
+                                style="align-self: start; position: sticky; top: 103px"
+                            >
+                                <div class="section-head">
+                                    <h2>Live Paper Preview</h2>
+                                    <span class="pill">Sample</span>
+                                </div>
+                                <div class="preview-sheet" id="paperPreview"></div>
+                                <div class="flex" style="margin-top: 17px; flex-wrap: wrap">
+                                    <button class="btn soft" onclick="downloadPaper(false)">
+                                        ↓ Question Paper PDF</button
+                                    ><button class="btn outline" onclick="downloadPaper(true)">
+                                        ↓ Answer Key PDF
+                                    </button>
+                                </div>
+                                <p class="footer-note">
+                                    Downloads contain sample questions in this prototype; real AI
+                                    generation comes later.
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+                    <!-- EDIT PAGE TEST: Online MCQ setup, timer inputs and result layout -->
+                    <section class="page" id="page-test">
+                        <div class="pagehead">
+                            <div>
+                                <div class="eyebrow">FOCUS MODE</div>
+                                <h1>Online MCQ Test</h1>
+                                <p>Set your own pace and measure your understanding.</p>
+                            </div>
+                        </div>
+                        <div id="testSetup" class="grid two">
+                            <div class="card">
+                                <h2>Customize Your Test</h2>
+                                <p>Start with your PDF, or choose a topic for quick practice.</p>
+                                <div
+                                    class="source-picker"
+                                    role="group"
+                                    aria-label="Question source"
+                                >
+                                    <button
+                                        id="sourcePdf"
+                                        class="source-choice selected"
+                                        aria-pressed="true"
+                                        onclick="setQuizSource('pdf')"
+                                    >
+                                        <span class="source-icon">▤</span
+                                        ><strong>From your PDF</strong
+                                        ><small>Your notes, your practice</small
+                                        ><span class="source-badge">Recommended</span></button
+                                    ><button
+                                        id="sourceTopic"
+                                        class="source-choice"
+                                        aria-pressed="false"
+                                        onclick="setQuizSource('topic')"
+                                    >
+                                        <span class="source-icon">◎</span
+                                        ><strong>Practice a topic</strong
+                                        ><small>Explore built-in questions</small>
+                                    </button>
+                                </div>
+                                <div id="quizPdfPanel">
+                                    <div
+                                        id="quizUpload"
+                                        class="upload quiz-upload"
+                                        role="button"
+                                        tabindex="0"
+                                        onclick="document.getElementById('quizPdfFile').click()"
+                                        onkeydown="
+                                            if (event.key === 'Enter' || event.key === ' ') {
+                                                event.preventDefault();
+                                                document.getElementById('quizPdfFile').click();
+                                            }
+                                        "
+                                        ondragover="
+                                            event.preventDefault();
+                                            this.classList.add('drag');
+                                        "
+                                        ondragleave="this.classList.remove('drag')"
+                                        ondrop="dropQuizPdf(event)"
+                                    >
+                                        <div class="upload-symbol">↑</div>
+                                        <strong id="quizFileLabel">Upload your study PDF</strong>
+                                        <p id="quizFileMeta">
+                                            Click or drag your notes here · PDF up to 50 MB
+                                        </p>
+                                        <input
+                                            type="file"
+                                            id="quizPdfFile"
+                                            accept="application/pdf,.pdf"
+                                            hidden
+                                            onchange="chooseQuizPdf(this.files[0])"
+                                        />
+                                    </div>
+                                    <button
+                                        class="btn outline hidden"
+                                        id="removeQuizPdf"
+                                        onclick="removeQuizFile()"
+                                        style="margin-top: 10px"
+                                    >
+                                        Remove PDF
+                                    </button>
+                                    <p class="small" style="margin-top: 12px">
+                                        PDF-based generation will be connected with the AI API. For
+                                        now, you can preview the test interface with clearly labeled
+                                        sample questions.
+                                    </p>
+                                </div>
+                                <div id="quizTopicPanel" class="hidden">
+                                    <div class="field">
+                                        <label for="testSubject">Practice topic</label
+                                        ><select
+                                            class="input"
+                                            id="testSubject"
+                                            onchange="updateQuizSourceNote()"
+                                        >
+                                            <option value="ds">Data Structures</option>
+                                            <option value="oop">OOP — C++ fundamentals</option>
+                                            <option value="pc">
+                                                Maths — Permutations & Combinations
+                                            </option>
+                                            <option value="integration">Maths — Integration</option>
+                                        </select>
+                                    </div>
+                                    <div class="topic-note" id="topicNote"></div>
+                                </div>
+                                <div class="field" style="margin-top: 22px">
+                                    <label>Number of MCQs</label
+                                    ><input
+                                        id="mcqCount"
+                                        class="input"
+                                        type="number"
+                                        min="1"
+                                        max="50"
+                                        value="10"
+                                    />
+                                </div>
+                                <div class="field" style="margin-top: 17px">
+                                    <label>Time per question (minutes)</label
+                                    ><input
+                                        id="timePerQuestion"
+                                        class="input"
+                                        type="number"
+                                        min="0.25"
+                                        max="30"
+                                        step="0.25"
+                                        value="1.5"
+                                    />
+                                </div>
+                                <button
+                                    class="btn primary"
+                                    style="margin-top: 24px; width: 100%"
+                                    onclick="startTest()"
+                                >
+                                    ▶ Start Demo Test
+                                </button>
+                                <p class="footer-note">
+                                    Demo questions only; no PDF analysis or API connection yet.
+                                </p>
+                            </div>
+                            <div
+                                class="card"
+                                style="background: linear-gradient(155deg, #f2edff, #fff)"
+                            >
+                                <div style="font-size: 50px; margin: 30px 0 15px">🎯</div>
+                                <div class="eyebrow">MADE FOR YOUR MATERIAL</div>
+                                <h2>Practice with purpose.</h2>
+                                <p>
+                                    Bring your notes into a focused practice session. Prefer a quick
+                                    warm-up? Explore Data Structures, OOP, and Maths topics.
+                                </p>
+                                <div class="mini-card" style="margin-top: 25px">
+                                    <b>What's included?</b>
+                                    <p>✓ PDF or topic as your question source</p>
+                                    <p>✓ Custom question count</p>
+                                    <p>✓ Adjustable timer</p>
+                                    <p>✓ Automatic submission</p>
+                                    <p>✓ Question-by-question analysis</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="testLive" class="hidden">
+                            <div class="card">
+                                <div class="flex between">
+                                    <div>
+                                        <div class="eyebrow">TEST IN PROGRESS</div>
+                                        <h2 id="testPosition">Question 1 of 10</h2>
+                                    </div>
+                                    <div class="timer" id="timer">15:00</div>
+                                </div>
+                                <div
+                                    id="liveSourceNote"
+                                    class="summary-note"
+                                    style="margin-top: 20px"
+                                ></div>
+                                <!-- Save the questions without submitting or restarting the test. -->
+                                <div class="flex" style="margin-top: 16px; flex-wrap: wrap">
+                                    <button class="btn outline" onclick="saveTestPaper()">
+                                        Save Paper
+                                    </button>
+                                    <span class="small">Keep this MCQ paper in My Papers.</span>
+                                </div>
+                                <div class="progress" style="margin: 20px 0 30px">
+                                    <div id="testProgress" style="width: 10%"></div>
+                                </div>
+                                <h2
+                                    id="questionText"
+                                    style="line-height: 1.6; margin-bottom: 25px"
+                                ></h2>
+                                <div
+                                    id="testOptions"
+                                    role="radiogroup"
+                                    aria-label="Answer options"
+                                ></div>
+                                <div class="question-map" id="questionMap"></div>
+                                <p class="small">
+                                    Purple: answered · Outlined: current · Light: unanswered
+                                </p>
+                                <div class="flex between" style="margin-top: 28px">
+                                    <button
+                                        class="btn outline"
+                                        id="previousButton"
+                                        onclick="changeQuestion(-1)"
+                                    >
+                                        ← Previous
+                                    </button>
+                                    <div class="flex">
+                                        <button class="btn soft" onclick="requestSubmit()">
+                                            Submit Test</button
+                                        ><button
+                                            class="btn primary"
+                                            id="nextButton"
+                                            onclick="changeQuestion(1)"
+                                        >
+                                            Next →
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="testResults" class="hidden">
+                            <div class="card" style="margin-bottom: 20px; text-align: center">
+                                <div style="font-size: 48px">🏆</div>
+                                <h1>Test complete!</h1>
+                                <p>Here's how you did on your practice test.</p>
+                                <div class="grid stats" style="margin: 25px 0 5px">
+                                    <div class="mini-card">
+                                        <small>Score</small>
+                                        <div class="num" id="resScore">0/10</div>
+                                    </div>
+                                    <div class="mini-card">
+                                        <small>Correct</small>
+                                        <div class="num good" id="resCorrect">0</div>
+                                    </div>
+                                    <div class="mini-card">
+                                        <small>Incorrect</small>
+                                        <div class="num bad" id="resWrong">0</div>
+                                    </div>
+                                    <div class="mini-card">
+                                        <small>Unanswered</small>
+                                        <div class="num" id="resSkip">0</div>
+                                    </div>
+                                </div>
+                                <div class="flex" style="justify-content: center; flex-wrap: wrap">
+                                    <button class="btn primary" onclick="saveTestPaper()">
+                                        Save Paper
+                                    </button>
+                                    <button class="btn outline" onclick="resetTest()">
+                                        ↻ Try Another Test
+                                    </button>
+                                    <button class="btn outline" onclick="navigate('performance')">
+                                        View Performance →
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <h2>Answer-by-Answer Analysis</h2>
+                                <p>
+                                    Compare your choice with the correct answer for each question.
+                                </p>
+                                <div class="flex" style="margin-top: 20px; flex-wrap: wrap">
+                                    <button class="pill" onclick="filterReview('all')">
+                                        All answers</button
+                                    ><button class="pill" onclick="filterReview('incorrect')">
+                                        Incorrect & skipped
+                                    </button>
+                                </div>
+                                <div
+                                    id="resultDetails"
+                                    class="results-list"
+                                    style="margin-top: 20px"
+                                ></div>
+                            </div>
+                        </div>
+                    </section>
+                    <!-- EDIT PAGE PAPERS: Saved-paper screen -->
+                    <section class="page" id="page-papers">
+                        <div class="pagehead">
+                            <div>
+                                <div class="eyebrow">YOUR LIBRARY</div>
+                                <h1>My Papers</h1>
+                                <p>Open the generated papers and online MCQ tests you chose to save.</p>
+                            </div>
+                            <button class="btn primary" onclick="navigate('create')">
+                                ＋ New Paper
+                            </button>
+                        </div>
+                        <div
+                            class="grid"
+                            style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr))"
+                        >
+                            <div class="card clickable" onclick="navigate('create')">
+                                <div style="font-size: 36px; margin-bottom: 20px">📘</div>
+                                <h2>Data Structures</h2>
+                                <p>25 questions · 50 marks</p>
+                                <div class="flex between" style="margin-top: 20px">
+                                    <span class="pill">Demo paper</span><span>→</span>
+                                </div>
+                            </div>
+                            <div class="card clickable" onclick="navigate('create')">
+                                <div style="font-size: 36px; margin-bottom: 20px">📗</div>
+                                <h2>Operating Systems</h2>
+                                <p>20 questions · 40 marks</p>
+                                <div class="flex between" style="margin-top: 20px">
+                                    <span class="pill">Demo paper</span><span>→</span>
+                                </div>
+                            </div>
+                            <div class="card clickable" onclick="navigate('create')">
+                                <div style="font-size: 36px; margin-bottom: 20px">📙</div>
+                                <h2>Python Programming</h2>
+                                <p>30 questions · 60 marks</p>
+                                <div class="flex between" style="margin-top: 20px">
+                                    <span class="pill">Demo paper</span><span>→</span>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="footer-note">
+                            Save papers you want to keep. Reopen the paper or PDF from your account anytime.
+                        </p>
+                    </section>
+                    <!-- EDIT PAGE PERFORMANCE: Performance cards and charts -->
+                    <section class="page" id="page-performance">
+                        <div class="pagehead">
+                            <div>
+                                <div class="eyebrow">LEARNING INSIGHTS</div>
+                                <h1>Performance Analytics</h1>
+                                <p>Understand your progress, one practice test at a time.</p>
+                            </div>
+                            <select
+                                class="input"
+                                style="max-width: 170px"
+                                id="chartRange"
+                                onchange="renderPerformance()"
+                            >
+                                <option value="week">Last 7 tests</option>
+                                <option value="month">Last 30 tests</option>
+                            </select>
+                        </div>
+                        <div class="grid stats">
+                            <div class="card stat">
+                                <small>Average Accuracy</small>
+                                <div class="num" style="margin-top: 18px">78%</div>
+                                <span class="tag">↗ Improving</span>
+                            </div>
+                            <div class="card stat">
+                                <small>Highest Score</small>
+                                <div class="num" style="margin-top: 18px">92%</div>
+                                <span class="tag">Personal best</span>
+                            </div>
+                            <div class="card stat">
+                                <small>Tests Taken</small>
+                                <div class="num" style="margin-top: 18px">18</div>
+                                <span class="muted small">Completed attempts</span>
+                            </div>
+                            <div class="card stat">
+                                <small>Practice Streak</small>
+                                <div class="num" style="margin-top: 18px">7 days</div>
+                                <span class="tag">Keep going</span>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="section-head">
+                                <div>
+                                    <h2>Your Score Trend</h2>
+                                    <p>Accuracy from your completed practice tests</p>
+                                </div>
+                                <span class="pill">↗ Growth</span>
+                            </div>
+                            <div
+                                id="performanceChart"
+                                class="chartwrap"
+                                style="height: 320px"
+                            ></div>
+                            <div id="performanceLabels" class="chart-labels"></div>
+                        </div>
+                        <div class="grid two" style="margin-top: 20px">
+                            <div class="card">
+                                <h2>Subject Breakdown</h2>
+                                <p>Your practice accuracy by topic</p>
+                                <div id="subjectBars" style="margin-top: 24px"></div>
+                            </div>
+                            <div class="card">
+                                <h2>Preparation Insights</h2>
+                                <div class="mini-card" style="margin-top: 18px">
+                                    <strong>Your next step</strong>
+                                    <p>
+                                        Your score insights appear here after you complete a
+                                        practice test.
+                                    </p>
+                                </div>
+                                <div class="mini-card" style="margin-top: 12px">
+                                    <strong>Practice with intention</strong>
+                                    <p>
+                                        Compare tests of similar difficulty for a more meaningful
+                                        progress picture.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="footer-note">
+                            Based on all your saved AI and topic practice tests.
+                        </p>
+                    </section>
+                    <!-- EDIT PAGE SETTINGS: Account and display settings -->
+                    <section class="page" id="page-settings">
+                        <div class="pagehead">
+                            <div>
+                                <div class="eyebrow">YOUR WORKSPACE, YOUR WAY</div>
+                                <h1>Settings</h1>
+                                <p>Manage your profile and make your workspace comfortable.</p>
+                            </div>
+                        </div>
+                        <div class="account-settings-grid">
+                            <div class="grid" style="align-content: start">
+                                <div class="card">
+                                    <div class="section-head">
+                                        <h2>Account Info</h2>
+                                        <span class="pill">Guest</span>
+                                    </div>
+                                    <div class="account-profile">
+                                        <div class="avatar" id="accountAvatar">S</div>
+                                        <div>
+                                            <strong id="accountDisplayName"
+                                                >Student Workspace</strong
+                                            >
+                                            <p class="small">Your profile</p>
+                                        </div>
+                                    </div>
+                                    <div class="account-detail">
+                                        <span>Email</span><strong>Not signed in</strong>
+                                    </div>
+                                    <div class="account-detail">
+                                        <span>Account status</span><strong>Guest workspace</strong>
+                                    </div>
+                                    <button
+                                        class="btn primary"
+                                        style="margin-top: 20px"
+                                        onclick="showLoginPlaceholder()"
+                                    >
+                                        Login to your account →
+                                    </button>
+                                </div>
+                                <div class="card">
+                                    <h2>Profile Name</h2>
+                                    <p>Choose the name shown on your dashboard.</p>
+                                    <form
+                                        onsubmit="
+                                            event.preventDefault();
+                                            saveProfileName();
+                                        "
+                                        style="margin-top: 18px"
+                                    >
+                                        <div class="field">
+                                            <label for="profileNameInput">Your name</label
+                                            ><input
+                                                class="input"
+                                                id="profileNameInput"
+                                                autocomplete="name"
+                                                placeholder="Enter your name"
+                                                maxlength="50"
+                                                required
+                                            />
+                                        </div>
+                                        <button
+                                            class="btn soft"
+                                            type="submit"
+                                            style="margin-top: 15px"
+                                        >
+                                            Save Name
+                                        </button>
+                                    </form>
+                                    <p class="small" style="margin-top: 12px">
+                                        Your display name is saved to your account.
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="grid" style="align-content: start">
+                                <div class="card">
+                                    <h2>Reading & Motion</h2>
+                                    <div
+                                        class="flex between"
+                                        style="
+                                            padding: 23px 0;
+                                            border-bottom: 1px solid var(--line);
+                                        "
+                                    >
+                                        <div>
+                                            <strong>Smooth transitions</strong>
+                                            <p>Keep movement gentle, or turn it off</p>
+                                        </div>
+                                        <button
+                                            id="animationToggle"
+                                            class="toggle on"
+                                            aria-label="Toggle animations"
+                                            onclick="toggleAnimations()"
+                                        ></button>
+                                    </div>
+                                    <div
+                                        class="flex between"
+                                        style="
+                                            padding: 23px 0;
+                                            border-bottom: 1px solid var(--line);
+                                        "
+                                    >
+                                        <div>
+                                            <strong>Comfortable text size</strong>
+                                            <p>Larger text for easier reading</p>
+                                        </div>
+                                        <button
+                                            id="textToggle"
+                                            class="toggle"
+                                            role="switch"
+                                            aria-checked="false"
+                                            aria-label="Comfortable text size"
+                                            onclick="toggleText()"
+                                        ></button>
+                                    </div>
+                                    <div class="flex between" style="padding: 23px 0 5px">
+                                        <div>
+                                            <strong>Appearance</strong>
+                                            <p>Light workspace with purple accents</p>
+                                        </div>
+                                        <span class="pill">Light</span>
+                                    </div>
+                                </div>
+                                <div class="card">
+                                    <h2>Account Session</h2>
+                                    <p style="margin-top: 10px">
+                                        You are currently browsing as a guest.
+                                    </p>
+                                    <button
+                                        class="btn outline"
+                                        style="margin-top: 18px"
+                                        onclick="requestLogout()"
+                                    >
+                                        <svg
+                                            class="ui-icon"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            stroke-width="1.7"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            aria-hidden="true"
+                                        >
+                                            <path
+                                                d="M10 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h5M10 12h11m-4-4 4 4-4 4"
+                                            /></svg
+                                        >Logout
+                                    </button>
+                                    <p class="small" style="margin-top: 12px">
+                                        Logout will be available when you are signed in.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="page" id="page-preview">
+                        <div class="pagehead">
+                            <div>
+                                <div class="eyebrow">PAPER WORKSPACE</div>
+                                <h1>Your paper, ready to review.</h1>
+                                <p>
+                                    Read the questions, check the answers, and export your practice
+                                    paper.
+                                </p>
+                            </div>
+                            <div class="paper-toolbar">
+                                <button class="btn outline" onclick="editCurrentPaper()">
+                                    ← Edit setup</button
+                                ><button class="btn primary" onclick="saveCurrentPaper()">
+                                    Save Paper
+                                </button>
+                            </div>
+                        </div>
+                        <div class="summary-note">
+                            Frontend demo · These are sample Data Structures questions, not
+                            generated from your PDF.
+                        </div>
+                        <div class="section-head">
+                            <div class="tabset">
+                                <button
+                                    id="tabPaper"
+                                    class="active"
+                                    onclick="showFullPreview(false)"
+                                >
+                                    Question Paper</button
+                                ><button id="tabAnswer" onclick="showFullPreview(true)">
+                                    Answer Key
+                                </button>
+                            </div>
+                        </div>
+                        <div class="paper-layout">
+                            <div class="preview-sheet full-sheet" id="fullPreview"></div>
+                            <aside class="grid" style="align-content: start">
+                                <div class="card">
+                                    <h2>Paper Summary</h2>
+                                    <div id="paperSummary" style="margin: 16px 0"></div>
+                                    <button
+                                        class="btn soft"
+                                        style="width: 100%; margin-top: 12px"
+                                        onclick="downloadPaper(false)"
+                                    >
+                                        ↓ Question Paper</button
+                                    ><button
+                                        class="btn outline"
+                                        style="width: 100%; margin-top: 10px"
+                                        onclick="downloadPaper(true)"
+                                    >
+                                        ↓ Answer Key
+                                    </button>
+                                    <p class="small">
+                                        Use “Save as PDF” in your browser’s print dialog.
+                                    </p>
+                                </div>
+                                <div class="mini-card">
+                                    <strong>Make it a practice session</strong>
+                                    <p>Try the interactive Data Structures demo quiz.</p>
+                                    <button class="btn soft" onclick="navigate('test')">
+                                        Take a Test →
+                                    </button>
+                                </div>
+                            </aside>
+                        </div>
+                    </section>
+                    <section class="page" id="page-history">
+                        <div class="pagehead">
+                            <div>
+                                <div class="eyebrow">YOUR PRACTICE JOURNEY</div>
+                                <h1>Test History</h1>
+                                <p>Revisit your attempts and learn from each answer.</p>
+                            </div>
+                            <button class="btn primary" onclick="navigate('test')">
+                                ＋ New Test
+                            </button>
+                        </div>
+                        <div class="card">
+                            <div class="section-head">
+                                <h2>Recent Attempts</h2>
+                                <span class="pill" id="historyCount">0 attempts</span>
+                            </div>
+                            <div id="historyContent" style="overflow-x: auto"></div>
+                        </div>
+                        <p class="footer-note">
+                            Every signed-in test is saved to your account. Pending saves retry when you reconnect.
+                        </p>
+                    </section>
+                    <section class="page" id="page-help">
+                        <div class="pagehead">
+                            <div>
+                                <div class="eyebrow">A LITTLE GUIDANCE</div>
+                                <h1>From notes to exam confidence.</h1>
+                                <p>A simple workspace for preparing, practicing, and reviewing.</p>
+                            </div>
+                        </div>
+                        <div class="grid help-grid">
+                            <div class="card">
+                                <div class="step">1</div>
+                                <h2>Set up your paper</h2>
+                                <p>
+                                    Select your PDF, enter your subject and choose how many
+                                    questions you want in every section.
+                                </p>
+                                <button class="btn soft" onclick="navigate('create')">
+                                    Create a paper →
+                                </button>
+                            </div>
+                            <div class="card">
+                                <div class="step">2</div>
+                                <h2>Preview & export</h2>
+                                <p>
+                                    Review the paper and answer key separately. Save the paper or export each with your browser.
+                                </p>
+                                <button class="btn soft" onclick="navigate('papers')">
+                                    Explore papers →
+                                </button>
+                            </div>
+                            <div class="card">
+                                <div class="step">3</div>
+                                <h2>Practice & improve</h2>
+                                <p>
+                                    Take a timed MCQ test, move between questions, and review correct, incorrect and skipped answers.
+                                </p>
+                                <button class="btn soft" onclick="navigate('test')">
+                                    Start practicing →
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card" style="margin-top: 22px">
+                            <h2>Common Questions</h2>
+                            <details open>
+                                <summary>Does this version read my PDF?</summary>
+                                <p>
+                                    Upload up to 8 PDFs or images: notes, syllabus or both. AI detects the material automatically. Review questions before use. Signed-in test results and papers you explicitly save sync to your account.
+                                </p>
+                            </details>
+                            <details>
+                                <summary>
+                                    Can I download a question paper and answer key separately?
+                                </summary>
+                                <p>
+                                    Yes. Each export opens a print window. Choose Save as PDF to
+                                    save that document.
+                                </p>
+                            </details>
+                            <details>
+                                <summary>Where are my papers and attempts saved?</summary>
+                                <p>
+                                    In this browser’s local storage. They will not sync between
+                                    devices, and clearing browser data removes them.
+                                </p>
+                            </details>
+                            <details>
+                                <summary>How do I skip a question?</summary>
+                                <p>
+                                    Press Next without selecting an answer. Use the numbered
+                                    question buttons to return at any time before submission.
+                                </p>
+                            </details>
+                            <details>
+                                <summary>Can I reduce the animation?</summary>
+                                <p>
+                                    Use Settings to turn transitions off. Your system’s
+                                    reduced-motion preference is also respected.
+                                </p>
+                            </details>
+                        </div>
+                    </section>
+                </div>
+            </main>
+        </div>
+        <div class="mobile-shade" id="mobileShade" onclick="closeMenu()"></div>
+        <div id="modalRoot"></div>
+        <div class="toast" id="toast"></div>
+        <!-- Browser behaviour lives in the existing backend.js file. -->
+        <script src="/backend.js"></script>
+    </body>
+</html>
