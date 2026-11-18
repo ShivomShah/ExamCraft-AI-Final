@@ -8,7 +8,7 @@
  *   J5 Dashboard / performance            J6 Login / signup / profile
  *   J7 Uploads / AI requests / answers    J8 Cloud history / Save Paper
  *
- * For answer word lengths, edit ANSWER_LENGTHS near the top of app.py.
+ * For answer style, edit SYSTEM_INSTRUCTION in app.py; no fixed word limits.
  * Setup commands, Supabase SQL and bug-check results are in existing README.txt.
  */
 // EDIT J1 — NAVIGATION, TOASTS AND CHART DRAWING
@@ -20,16 +20,24 @@ const pageNames = {
     performance: 'Performance',
     settings: 'Settings',
 };
-async function navigate(page) {
-    if (!pageNames[page]) return;
+function motionEnabled() {
+    return !document.body.classList.contains('no-animations') &&
+        !matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+async function navigate(page, historyMode = 'push') {
+    if (!Object.hasOwn(pageNames, page)) return;
     const token = ++navigationVersion;
+    navigationPage = page;
+    if (navigationReady && historyMode === 'replace') {
+        history.replaceState({ ...history.state, examcraftPage: page }, '', '#' + page);
+    } else if (navigationReady && historyMode === 'push' && location.hash !== '#' + page) {
+        history.pushState({ examcraftPage: page, examcraftBack: true }, '', '#' + page);
+    }
     const previous = document.querySelector('.page.active');
     if (previous?.id !== 'page-' + page) {
-        if (
-            previous &&
-            !document.body.classList.contains('no-animations') &&
-            !matchMedia('(prefers-reduced-motion: reduce)').matches
-        ) {
+        closeAuthDialog?.();
+        byId('modalCancel')?.click();
+        if (previous && motionEnabled()) {
             previous.classList.add('leaving');
             await new Promise((resolve) => setTimeout(resolve, 160));
         }
@@ -42,7 +50,7 @@ async function navigate(page) {
         target.style.animation = 'none';
         void target.offsetWidth;
         target.style.animation = '';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo({ top: 0, behavior: 'instant' });
     } else {
         previous.classList.remove('leaving'); // Cancelled transition must stay visible.
     }
@@ -57,16 +65,41 @@ async function navigate(page) {
     byId('searchResults')?.remove();
     if (page === 'papers') renderPapers();
     if (page === 'history') renderHistory();
-    if (page === 'preview') showFullPreview(viewingAnswers);
+    if (page === 'preview') {
+        showFullPreview(viewingAnswers);
+        renderPapers();
+    }
     if (page === 'performance') renderPerformance();
     refreshDashboard();
-    history.replaceState(null, '', '#' + page);
     const heading = document.querySelector('#page-' + page + ' h1');
     if (heading) {
         heading.tabIndex = -1;
         heading.focus({ preventScroll: true });
     }
 }
+function initializeNavigation() {
+    navigationReady = true;
+    history.scrollRestoration = 'manual';
+    const route = location.hash.slice(1);
+    const page = Object.hasOwn(pageNames, route) ? route : navigationPage;
+    if (!history.state?.examcraftPage) {
+        history.replaceState({ examcraftPage: 'dashboard', examcraftBack: false }, '', '#dashboard');
+        void navigate(page);
+    } else {
+        void navigate(page, 'replace');
+    }
+}
+function restoreNavigation() {
+    if (!navigationReady) return;
+    const route = location.hash.slice(1);
+    const page = Object.hasOwn(pageNames, route) ? route : 'dashboard';
+    if (history.state?.examcraftPage !== page) {
+        history.replaceState({ examcraftPage: page, examcraftBack: true }, '', '#' + page);
+    }
+    if (navigationPage !== page) void navigate(page, 'traverse');
+}
+window.addEventListener('popstate', restoreNavigation);
+window.addEventListener('hashchange', restoreNavigation);
 document
     .querySelectorAll('[data-page]')
     .forEach((b) => (b.onclick = () => navigate(b.dataset.page)));
@@ -97,7 +130,7 @@ function makeChart(id, data) {
     for (let n = 0; n <= 100; n += 25) {
         grid += `<line x1="${left}" y1="${y(n)}" x2="${w - right}" y2="${y(n)}" stroke="#eeedf7" stroke-dasharray="4 5"/><text x="${left - 12}" y="${y(n) + 4}" font-size="11" fill="#626780" text-anchor="end">${n}</text>`;
     }
-    el.innerHTML = `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="Sample performance score line chart"><defs><linearGradient id="shade-${id}" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#9578f7" stop-opacity=".22"/><stop offset="1" stop-color="#9578f7" stop-opacity="0"/></linearGradient></defs>${grid}<polygon points="${area}" fill="url(#shade-${id})"/><polyline points="${pts}" fill="none" stroke="#8163f2" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" style="stroke-dasharray:1500;stroke-dashoffset:1500;animation:drawLine 1.5s ease forwards"/>${data.map((v, i) => `<circle cx="${x(i)}" cy="${y(v)}" r="5" fill="white" stroke="#8163f2" stroke-width="3"><title>Score: ${v}%</title></circle>`).join('')}</svg>`;
+    el.innerHTML = `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="Performance score line chart"><defs><linearGradient id="shade-${id}" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#9578f7" stop-opacity=".22"/><stop offset="1" stop-color="#9578f7" stop-opacity="0"/></linearGradient></defs>${grid}<polygon points="${area}" fill="url(#shade-${id})"/><polyline points="${pts}" fill="none" stroke="#8163f2" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" style="stroke-dasharray:1500;stroke-dashoffset:1500;animation:drawLine 1.5s ease forwards"/>${data.map((v, i) => `<circle cx="${x(i)}" cy="${y(v)}" r="5" fill="white" stroke="#8163f2" stroke-width="3"><title>Score: ${v}%</title></circle>`).join('')}</svg>`;
 }
 
 // EDIT J2 — QUESTION COUNTS (Python validates the same types)
@@ -112,12 +145,12 @@ const defaults = [0, 0, 0, 0, 0];
 byId('counters').innerHTML = questionTypes
     .map(
         ([key, label], i) =>
-            `<div class="counter-row"><div><strong>${label}</strong><p class="small">Section ${String.fromCharCode(65 + i)} if included</p></div><input class="input count" type="number" min="0" max="100" value="${defaults[i]}" data-type="${key}" oninput="updatePreview()"></div>`,
+            `<div class="counter-row"><strong>${label}</strong><input class="input count" type="number" min="0" max="50" value="${defaults[i]}" data-type="${key}" oninput="updatePreview()"></div>`,
     )
     .join('');
 function getCounts() {
     return [...document.querySelectorAll('.count')].map((x) =>
-        Math.max(0, Math.min(100, parseInt(x.value) || 0)),
+        Math.max(0, Math.min(50, parseInt(x.value) || 0)),
     );
 }
 function escapeHtml(s) {
@@ -126,15 +159,6 @@ function escapeHtml(s) {
         (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c],
     );
 }
-// Live preview is implemented once in backend.js.
-function fileChosen(file) {
-    addMaterial('paper', file ? [file] : []);
-}
-function handleDrop(e) {
-    e.preventDefault();
-    addMaterial('paper', [...e.dataTransfer.files]);
-}
-
 // EDIT J3 — BUILT-IN TOPIC PRACTICE AND TEST SCORING
 const quizBank = [
     {
@@ -211,7 +235,7 @@ function rememberTestDetails(materialKind = null) {
         filename:
             runningQuizSource === 'ai'
                 ? materialFiles.quiz.map((file) => file.name).join(', ')
-                : 'Built-in topic practice',
+                : 'Topic practice',
         materialKind,
     };
     reviewData = null;
@@ -285,7 +309,7 @@ function submitTest(auto = false) {
             Math.round((Date.now() - (window.testStartedAt || Date.now())) / 1000),
         ),
     };
-    attempts.unshift(reviewData);
+    if (authUser) attempts.unshift(reviewData);
     // Every completed test gets its own stable ID and durable outbox entry.
     ExamStore.saveAttempt(reviewData);
     filterReview('all');
@@ -313,10 +337,11 @@ Object.assign(pageNames, {
     history: 'Test History',
     help: 'Help & Guide',
 });
-let selectedFile = null,
-    activePaper = null,
+let activePaper = null,
     reviewData = null,
     navigationVersion = 0,
+    navigationReady = false,
+    navigationPage = 'dashboard',
     viewingAnswers = false;
 function readLocal(key) {
     try {
@@ -327,8 +352,6 @@ function readLocal(key) {
 }
 let savedPapers = [],
     attempts = [];
-if (!Array.isArray(savedPapers)) savedPapers = [];
-if (!Array.isArray(attempts)) attempts = [];
 function closeMenu() {
     byId('sidebar').classList.remove('open');
     byId('mobileShade').classList.remove('show');
@@ -357,12 +380,12 @@ document.addEventListener('click', (e) => {
     if (!e.target.closest('.search,.search-results'))
         byId('searchResults')?.remove();
     const b = e.target.closest('.btn,.pill,.round');
-    if (!b || b.disabled) return;
+    if (!b || b.disabled || !motionEnabled()) return;
     const ripple = document.createElement('span');
     ripple.className = 'ripple';
     const box = b.getBoundingClientRect();
-    ripple.style.left = e.clientX - box.left + 'px';
-    ripple.style.top = e.clientY - box.top + 'px';
+    ripple.style.left = (e.detail ? e.clientX - box.left : box.width / 2) + 'px';
+    ripple.style.top = (e.detail ? e.clientY - box.top : box.height / 2) + 'px';
     b.append(ripple);
     setTimeout(() => ripple.remove(), 650);
 });
@@ -411,7 +434,7 @@ function startTopicPractice() {
     const n = Number(byId('mcqCount').value),
         per = Number(byId('timePerQuestion').value);
     if (!Number.isInteger(n) || n < 1 || n > topicPracticeLimit)
-        return toast('Choose 1 to 10 built-in practice questions.');
+        return toast('Choose 1 to 10 topic practice questions.');
     if (!Number.isFinite(per) || per < 0.25 || per > 30)
         return toast('Choose 0.25 to 30 minutes per question.');
     if (quizSource === 'pdf') return toast('Upload material and use Generate & Start Test.');
@@ -481,7 +504,12 @@ async function reviewAttempt(i) {
 }
 // EDIT J4 — PAPER PREVIEW AND SAVED-PAPER CARDS
 function showFullPreview(answer = false) {
+    if (viewingAnswers !== answer && motionEnabled()) {
+        byId('fullPreview').animate([{ opacity: 0.55 }, { opacity: 1 }], { duration: 180 });
+    }
     viewingAnswers = answer;
+    byId('tabPaper').setAttribute('aria-pressed', String(!answer));
+    byId('tabAnswer').setAttribute('aria-pressed', String(answer));
     byId('tabPaper').classList.toggle('active', !answer);
     byId('tabAnswer').classList.toggle('active', answer);
     byId('fullPreview').innerHTML = activePaper
@@ -505,6 +533,10 @@ function editCurrentPaper() {
     navigate('create');
 }
 function renderPapers() {
+    const saved = activePaper && savedPapers.some((paper) => String(paper.id) === String(activePaper.id));
+    const save = byId('savePaperButton');
+    save.disabled = !activePaper || !!saved;
+    save.textContent = !authUser ? 'Sign in to save' : saved ? 'In My Papers' : 'Save Paper';
     const grid = document.querySelector('#page-papers .grid');
     grid.innerHTML = savedPapers.length
         ? savedPapers
@@ -517,6 +549,8 @@ function renderPapers() {
 }
 function openPaper(i) {
     activePaper = structuredClone(savedPapers[i]);
+    generatedDraftKey = null;
+    updatePreview();
     viewingAnswers = false;
     navigate('preview');
 }
@@ -550,7 +584,6 @@ window.addEventListener('beforeunload', (e) => {
     }
 });
 let quizSource = 'pdf',
-    quizPdf = null,
     runningQuizLabel = 'Data Structures',
     runningQuizSource = 'topic';
 const topicNames = {
@@ -698,6 +731,7 @@ const topicBanks = {
     ]),
 };
 function setQuizSource(source) {
+    if (generationController) return toast('Wait for generation or cancel before changing the source.');
     quizSource = source;
     const pdf = source === 'pdf';
     byId('quizPdfPanel').classList.toggle('hidden', !pdf);
@@ -710,21 +744,6 @@ function setQuizSource(source) {
         byId(id).setAttribute('aria-pressed', String(on));
     }
     updateQuizSourceNote();
-}
-function chooseQuizPdf(file) {
-    addMaterial('quiz', file ? [file] : []);
-}
-function dropQuizPdf(e) {
-    e.preventDefault();
-    addMaterial('quiz', [...e.dataTransfer.files]);
-}
-function removeQuizFile() {
-    quizPdf = null;
-    byId('quizPdfFile').value = '';
-    byId('quizFileLabel').textContent = 'Upload your study PDF';
-    byId('quizFileMeta').textContent =
-        'Click or drag your notes here · PDF up to 50 MB';
-    byId('removeQuizPdf').classList.add('hidden');
 }
 function launchQuiz(n, key) {
     answers = Array(n).fill(null);
@@ -745,7 +764,7 @@ function launchQuiz(n, key) {
     runningQuizSource = 'topic';
     rememberTestDetails();
     byId('liveSourceNote').textContent =
-        'Topic practice · ' + topicNames[key] + ' · Built-in questions';
+        'Topic practice · ' + topicNames[key];
     window.testStartedAt = Date.now();
     startTestTimer();
     renderQuestion();
@@ -834,7 +853,7 @@ function refreshDashboard() {
         })),
         ...attempts.map((a) => ({
             title: a.subject,
-            type: a.source === 'pdf-demo' ? 'PDF Demo Test' : 'Practice Test',
+            type: a.source === 'ai' ? 'Study Material Test' : 'Topic Practice',
             date: a.date,
             score: accuracy(a) + '%',
             status: 'Completed',
@@ -891,7 +910,7 @@ function renderPerformance() {
         '#performanceLabels',
         byId('chartRange').value === 'month' ? 30 : 7,
     );
-    const groups = {};
+    const groups = Object.create(null);
     for (const a of attempts) {
         (groups[a.subject] ??= []).push(accuracy(a));
     }
@@ -936,9 +955,6 @@ function applyProfileName(name) {
         : 'Your next exam starts here. 👋';
     byId('profileNameInput').value = name;
 }
-// Public Supabase defaults. Environment overrides arrive from /api/status.
-const SUPABASE_URL = 'https://lphbgioctrgznjxhvuln.supabase.co';
-const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_lAlGVqW-RVwn7-UFxdAJrQ_ftNpH4mu';
 let authClient = null,
     authUser = null,
     authReady = false,
@@ -949,7 +965,7 @@ function accountKey(kind) {
 function authError(error) {
     return error?.message || 'Connection failed. Check your internet and try again.';
 }
-function syncAccount(user) {
+function syncAccount(user, restoring = false) {
     const changed = (authUser?.id || null) !== (user?.id || null);
     authUser = user;
     if (changed) {
@@ -965,10 +981,6 @@ function syncAccount(user) {
         answers = [];
         reviewData = null;
         activePaper = null;
-        selectedFile = null;
-        removeQuizFile();
-        byId('pdfFile').value = '';
-        byId('fileLabel').textContent = 'Click to upload your study PDF';
         byId('resultDetails').innerHTML = '';
         ['resScore', 'resCorrect', 'resWrong', 'resSkip'].forEach(
             (id) => (byId(id).textContent = '—'),
@@ -984,7 +996,8 @@ function syncAccount(user) {
         attempts = user ? readLocal(accountKey('attempts')) : [];
         if (!Array.isArray(savedPapers)) savedPapers = [];
         if (!Array.isArray(attempts)) attempts = [];
-        navigate('dashboard');
+        const destination = location.hash.slice(1);
+        navigate(restoring && Object.hasOwn(pageNames, destination) ? destination : 'dashboard', 'replace');
     }
     applyProfileName(String(user?.user_metadata?.full_name || '').slice(0, 50));
     const settings = byId('page-settings');
@@ -1010,6 +1023,13 @@ function syncAccount(user) {
     renderPerformance();
     renderPapers();
     renderHistory();
+    document.querySelectorAll('[onclick="saveTestPaper()"]').forEach(
+        (button) => (button.hidden = !user),
+    );
+    byId('paperSaveNote').textContent = user
+        ? 'Choose Save Paper to keep a copy in My Papers.'
+        : 'Guest paper · Download before reloading, or sign in to keep a copy.';
+    updateUploadLimits();
     ExamStore.activate(user);
 }
 async function saveProfileName() {
@@ -1033,9 +1053,9 @@ async function saveProfileName() {
 }
 function showLoginPlaceholder() {
     if (authUser) return navigate('settings');
-    openAuth('login');
+    openAuth('login', byId('page-preview').classList.contains('active') ? activePaper : null);
 }
-function openAuth(mode = 'login') {
+function openAuth(mode = 'login', guestPaper = null) {
     if (closeAuthDialog) closeAuthDialog();
     const root = byId('modalRoot'),
         prior = document.activeElement;
@@ -1078,8 +1098,8 @@ function openAuth(mode = 'login') {
     byId('authClose').onclick = close;
     document
         .getElementById('authSwitch')
-        ?.addEventListener('click', () => openAuth(signup || recover ? 'login' : 'signup'));
-    byId('authForgot')?.addEventListener('click', () => openAuth('recover'));
+        ?.addEventListener('click', () => openAuth(signup || recover ? 'login' : 'signup', guestPaper));
+    byId('authForgot')?.addEventListener('click', () => openAuth('recover', guestPaper));
     root.querySelector('input')?.focus();
     byId('authForm').onsubmit = async (e) => {
         e.preventDefault();
@@ -1139,7 +1159,13 @@ function openAuth(mode = 'login') {
                     syncAccount(result.data.user);
                     busy = false;
                     close();
-                    toast(signup ? 'Welcome! Your account is ready.' : 'You are signed in.');
+                    if (guestPaper) {
+                        activePaper = guestPaper;
+                        generatedDraftKey = null;
+                        viewingAnswers = false;
+                        await navigate('preview', 'replace');
+                    }
+                    toast(guestPaper ? 'Signed in. Choose Save Paper to keep this paper.' : 'You are signed in.');
                     return;
                 }
                 message.textContent =
@@ -1169,19 +1195,19 @@ async function requestLogout() {
 async function initializeAuth() {
     syncAccount(null);
     const config = await window.examConfigPromise;
-    // Load asynchronously so the workspace remains usable if the CDN is unavailable.
+    if (!config?.supabase_url || !config.supabase_public_key) return;
     const authScript = document.createElement('script');
-    authScript.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-    authScript.onerror = () => toast('Could not load login. Check your internet and reload.');
+    authScript.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.js';
     authScript.onload = () => {
         try {
             authClient = window.supabase.createClient(
-                config?.supabase_url || SUPABASE_URL,
-                config?.supabase_public_key || SUPABASE_PUBLISHABLE_KEY,
+                config.supabase_url, config.supabase_public_key,
             );
             authClient.auth.onAuthStateChange((event, session) => {
+                const restoring = !authReady && event !== 'PASSWORD_RECOVERY';
                 authReady = true;
-                syncAccount(session?.user || null);
+                if (!navigationReady) initializeNavigation();
+                syncAccount(session?.user || null, restoring);
                 if (event === 'PASSWORD_RECOVERY') setTimeout(() => openAuth('reset'), 0);
             });
         } catch (e) {
@@ -1260,8 +1286,12 @@ function showGenerationError(kind, message) {
 function initializeUpload(kind, inputId, zoneId) {
     const input = byId(inputId),
         zone = byId(zoneId);
-    input.accept = '.pdf,.jpg,.jpeg,.png,.webp';
-    input.multiple = true;
+    zone.onclick = () => input.click();
+    zone.ondragover = (event) => {
+        event.preventDefault();
+        zone.classList.add('drag');
+    };
+    zone.ondragleave = () => zone.classList.remove('drag');
     input.onchange = () => {
         addMaterial(kind, [...input.files]);
         input.value = '';
@@ -1286,11 +1316,19 @@ function initializeUpload(kind, inputId, zoneId) {
             : document.querySelector('#testSetup button[onclick="startTest()"]');
     generateButton.after(status);
     const note = document.createElement('p');
-    note.className = 'small';
-    note.textContent =
-        'Upload notes, a syllabus, or both: up to 8 PDFs/images, 50 MB total. AI detects the material automatically. Files are sent to Gemini for processing; large uploads may be stored privately during generation.';
+    note.className = 'upload-limit';
+    note.id = kind + 'UploadLimit';
     list.after(note);
-    zone.querySelector('p').textContent = 'Click or drop PDF / JPG / PNG / WebP · 50 MB combined';
+}
+async function updateUploadLimits() {
+    const config = await window.examConfigPromise;
+    const megabytes = authUser ? 50 : (config?.guest_upload_max_bytes ??
+        (config?.upload_mode === 'storage' ? 3 : 50) * 1024 * 1024) / 1024 / 1024;
+    for (const [kind, zoneId] of [['paper', 'upload'], ['quiz', 'quizUpload']]) {
+        byId(zoneId).querySelector('.upload-meta').textContent =
+            `PDF, JPG, PNG or WebP · 8 files · ${megabytes} MB total`;
+        byId(kind + 'UploadLimit').textContent = 'Add notes, a syllabus or both. You can drag files here.';
+    }
 }
 function addMaterial(kind, files) {
     if (generationController) return toast('Wait for generation or cancel before changing files.');
@@ -1346,8 +1384,8 @@ function renderMaterial(kind) {
     });
     const label = byId(kind === 'paper' ? 'fileLabel' : 'quizFileLabel');
     label.textContent = materialFiles[kind].length
-        ? materialFiles[kind].length + ' source file(s) selected · Click to add more'
-        : 'Upload notes or syllabus (PDF / images)';
+        ? materialFiles[kind].length + (materialFiles[kind].length === 1 ? ' file' : ' files') + ' selected · Add more'
+        : 'Add notes or syllabus';
     if (kind === 'paper') updatePreview();
 }
 initializeUpload('paper', 'pdfFile', 'upload');
@@ -1358,32 +1396,17 @@ previewStatus.className = 'generation-status';
 previewStatus.setAttribute('role', 'status');
 previewStatus.setAttribute('aria-live', 'polite');
 byId('paperPreview').before(previewStatus);
-byId('removeQuizPdf').style.display = 'none';
-byId('sourcePdf').querySelector('strong').textContent = 'Notes / syllabus';
-byId('sourcePdf').querySelector('small').textContent = 'Automatic notes and syllabus detection';
-byId('generateButton').textContent = '✦ Generate Question Paper →';
 byId('subject').maxLength = 120;
-document.querySelectorAll('.count').forEach((x) => (x.max = 50));
-byId('upload').closest('.card').querySelector('.pill').textContent = 'PDF + images';
-const studyNote = byId('upload').closest('.card').querySelector('.footer-note');
-if (studyNote)
-    studyNote.textContent =
-        'Notes, syllabus or both — automatically detected. Very Short: 20–30 words; Short: 40–50; Long: 100–180.';
-byId('quizPdfPanel').querySelector('p.small').textContent =
-    'Upload notes, a syllabus or both. Questions use all selected sources together.';
-document.querySelector('#page-create .studio-preview .pill').textContent = 'AI Paper';
-document.querySelector('#page-create .studio-preview .footer-note').textContent =
-    'Generate first, then export the paper or answer key with Save as PDF.';
-byId('mcqCount').max = 50;
 function updateQuizSourceNote() {
     const pdf = quizSource === 'pdf';
+    byId('mcqCount').max = pdf ? 50 : topicPracticeLimit;
     byId('topicNote').textContent =
-        topicDescriptions[byId('testSubject').value] + ' 10 built-in practice questions available.';
+        topicDescriptions[byId('testSubject').value] + ' 10 practice questions available.';
     document.querySelector('#testSetup .footer-note').textContent = pdf
-        ? 'AI questions from notes or syllabus · Up to 50 questions'
-        : 'Built-in topic practice · 1–10 questions';
+        ? 'Questions from your study material · Up to 50 questions'
+        : 'Topic practice · 1–10 questions';
     document.querySelector('#testSetup button[onclick="startTest()"]').textContent = pdf
-        ? '✦ Generate & Start Test'
+        ? 'Generate & Start Test'
         : '▶ Start Topic Practice';
 }
 updateQuizSourceNote();
@@ -1406,18 +1429,11 @@ function draftPaperMarkup(counts) {
         <div class="marks">Time: ${escapeHtml(byId('duration').value || '—')} minutes · Marks: ${escapeHtml(byId('marks').value || '—')}</div>
         <div class="draft-summary"><span>${total} question${total === 1 ? '' : 's'}</span><span>${escapeHtml(byId('difficulty').value)}</span></div>
         <p class="draft-note">Live outline · Your questions will appear after generation.</p>`;
-    let number = 0,
-        section = 0;
+    let section = 0;
     counts.forEach((count, index) => {
         if (!count) return;
         markup += `<h4>SECTION ${String.fromCharCode(65 + section++)} — ${escapeHtml(questionTypes[index][1].toUpperCase())}</h4>`;
         markup += `<p class="small">${count} question${count === 1 ? '' : 's'}</p>`;
-        for (let item = 0; item < Math.min(count, 3); item++) {
-            markup += `<p class="draft-question"><b>${number + item + 1}.</b> Question will be generated from your material.</p>`;
-        }
-        if (count > 3)
-            markup += `<p class="small">+ ${count - 3} more questions in this section</p>`;
-        number += count;
     });
     if (!total) markup += '<p>Choose your question counts to build the paper outline.</p>';
     if (total > 50) markup += '<p class="bad">Choose up to 50 questions per paper.</p>';
@@ -1426,7 +1442,14 @@ function draftPaperMarkup(counts) {
 
 function updatePreview() {
     const counts = getCounts();
-    byId('totalQuestions').textContent = counts.reduce((a, b) => a + b, 0);
+    const total = String(counts.reduce((a, b) => a + b, 0)), counter = byId('totalQuestions');
+    if (counter.textContent !== total && motionEnabled()) {
+        counter.animate([{ transform: 'scale(1.18)' }, { transform: 'scale(1)' }], { duration: 180 });
+    }
+    counter.textContent = total;
+    document.querySelectorAll('.counter-row').forEach((row, i) => {
+        row.classList.toggle('included', counts[i] > 0);
+    });
     const generated = !!activePaper && generatedDraftKey === paperDraftKey();
     byId('paperPreview').innerHTML = generated
         ? fullMarkup(activePaper, false)
@@ -1446,7 +1469,7 @@ function updatePreview() {
     }
 }
 function fullMarkup(p, answer = false) {
-    return `<h3>${escapeHtml(p.subject.toUpperCase())}</h3><div class="sub">${answer ? 'ANSWER KEY' : 'QUESTION PAPER'}</div><div class="marks">Time: ${escapeHtml(p.duration)} minutes · Marks: ${escapeHtml(p.marks)}</div><p class="small" style="text-align:center">${p.source === 'topic' ? 'Built-in topic practice' : 'AI-generated from uploaded study material'} · Review before use</p>${p.sections.map((s, i) => `<h4>SECTION ${String.fromCharCode(65 + i)} — ${escapeHtml(s.type.toUpperCase())}</h4>${s.questions.map((q) => `<p><b>${q.number}.</b> ${escapeHtml(q.text)}</p>${answer ? `<p><b>Answer:</b> ${escapeHtml(q.answer)}</p><p class="source-ref">Source: ${escapeHtml(q.source || 'Not recorded')}</p>` : q.options ? `<p>${q.options.map((v, j) => String.fromCharCode(65 + j) + ') ' + escapeHtml(v)).join('\n')}</p>` : ''}`).join('')}`).join('')}`;
+    return `<h3>${escapeHtml(p.subject.toUpperCase())}</h3><div class="sub">${answer ? 'ANSWER KEY' : 'QUESTION PAPER'}</div><div class="marks">Time: ${escapeHtml(p.duration)} minutes · Marks: ${escapeHtml(p.marks)}</div>${p.sections.map((s, i) => `<h4>SECTION ${String.fromCharCode(65 + i)} — ${escapeHtml(s.type.toUpperCase())}</h4>${s.questions.map((q) => `<p><b>${q.number}.</b> ${escapeHtml(q.text)}</p>${answer ? `<p><b>Answer:</b> ${escapeHtml(q.answer)}</p><p class="source-ref">Source: ${escapeHtml(q.source || 'Not recorded')}</p>` : q.options ? `<p>${q.options.map((v, j) => String.fromCharCode(65 + j) + ') ' + escapeHtml(v)).join('\n')}</p>` : ''}`).join('')}`).join('')}`;
 }
 updatePreview();
 document.querySelectorAll('#subject, #duration, #marks, #difficulty, .count').forEach((input) => {
@@ -1462,16 +1485,12 @@ function readBase64(file) {
         reader.readAsDataURL(file);
     });
 }
-// 3. AUTHENTICATED GENERATION REQUEST
+// 3. GUEST OR AUTHENTICATED GENERATION REQUEST
 // Hosted large files bypass the function body limit via private Supabase Storage.
 async function requestQuestions(kind, counts, subject, difficulty) {
-    if (!authUser || !authClient) {
-        showLoginPlaceholder();
-        throw new Error('Please log in before generating questions.');
-    }
     if (!materialFiles[kind].length) throw new Error('Upload a PDF or your study images first.');
     if (generationController) throw new Error('Another generation is in progress.');
-    const owner = authUser.id,
+    const owner = authUser?.id || null,
         controller = new AbortController();
     generationController = controller;
     generationStartedAt = Date.now();
@@ -1479,23 +1498,27 @@ async function requestQuestions(kind, counts, subject, difficulty) {
     const ticker = setInterval(updateGenerationClock, 1000);
     const timeout = setTimeout(() => controller.abort(), 9 * 60 * 1000);
     const uploadedPaths = [];
-    let uploadAuthorization = null;
-    let uploadBaseUrl = null;
+    let uploadAuthorization, config;
     try {
-        const { data, error } = await authClient.auth.getSession();
-        if (error || !data.session) throw new Error('Please log in again.');
-        const config = await window.examConfigPromise;
+        config = await window.examConfigPromise;
+        if (!config) throw new Error('Cannot reach the server. Reload and try again.');
+        const totalBytes = materialFiles[kind].reduce((sum, file) => sum + file.size, 0);
+        const guestLimit = config?.guest_upload_max_bytes ??
+            (config?.upload_mode === 'storage' ? 3 : 50) * 1024 * 1024;
+        if (!owner && totalBytes > guestLimit)
+            throw new Error('Guest uploads can total up to ' + (guestLimit / 1024 / 1024) +
+                ' MB. Use smaller files or log in for larger uploads.');
         // Base64 adds roughly one third. Keep JSON well below Vercel's 4.5 MB cap.
         const useStorage =
-            config?.upload_mode === 'storage' &&
-            materialFiles[kind].reduce((sum, file) => sum + file.size, 0) > 2.5 * 1024 * 1024;
+            !!owner && config.upload_mode === 'storage' && totalBytes > guestLimit;
         let files;
         if (useStorage) {
             files = [];
+            const { data, error } = await authClient.auth.getSession();
+            if (error || data.session?.user.id !== owner) throw new Error('Please log in again.');
             uploadAuthorization = data.session.access_token;
-            uploadBaseUrl = config.supabase_url;
             for (const file of materialFiles[kind]) {
-                if (authUser?.id !== owner)
+                if ((authUser?.id || null) !== owner)
                     throw new Error('Your account changed. Please generate again.');
                 const extension = file.name.split('.').pop().toLowerCase();
                 const path = owner + '/' + crypto.randomUUID() + '.' + extension;
@@ -1543,7 +1566,7 @@ async function requestQuestions(kind, counts, subject, difficulty) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: 'Bearer ' + data.session.access_token,
+                ...(useStorage ? { Authorization: 'Bearer ' + uploadAuthorization } : {}),
             },
             body: JSON.stringify({
                 files,
@@ -1569,11 +1592,11 @@ async function requestQuestions(kind, counts, subject, difficulty) {
             throw new Error(message);
         }
         if (!response.ok) throw new Error(result.error || 'Generation failed.');
-        if (authUser?.id !== owner) throw new Error('Your account changed. Please generate again.');
+        if ((authUser?.id || null) !== owner) throw new Error('Your account changed. Please generate again.');
         setGenerationStatus(
             kind,
             'success',
-            'Ready · Detected ' + (result.material_kind || 'study material'),
+            'Ready in ' + Math.ceil((Date.now() - generationStartedAt) / 1000) + 's · ' + result.material_kind,
         );
         return result;
     } catch (error) {
@@ -1582,33 +1605,32 @@ async function requestQuestions(kind, counts, subject, difficulty) {
                 ? 'Generation cancelled or timed out. Any request already sent to Gemini may still consume quota.'
                 : error.message;
         const failure = new Error(message);
-        failure.accountChanged = authUser?.id !== owner;
+        failure.accountChanged = (authUser?.id || null) !== owner;
         if (!failure.accountChanged) setGenerationStatus(kind, 'error', message);
         throw failure;
     } finally {
         clearTimeout(timeout);
         clearInterval(ticker);
-        if (uploadedPaths.length && uploadAuthorization && uploadBaseUrl) {
+        if (uploadedPaths.length && uploadAuthorization) {
             // A separate signal allows cleanup after generation cancellation.
-            const config = await window.examConfigPromise;
-            try {
-                const cleanup = await fetch(
-                    uploadBaseUrl + '/storage/v1/object/examcraft-material',
-                    {
-                        method: 'DELETE',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            apikey: config.supabase_public_key,
-                            Authorization: 'Bearer ' + uploadAuthorization,
-                        },
-                        body: JSON.stringify({ prefixes: uploadedPaths }),
-                        signal: AbortSignal.timeout(8000),
+            // Do not delay a ready paper while temporary uploads are removed.
+            void fetch(
+                config.supabase_url + '/storage/v1/object/examcraft-material',
+                {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        apikey: config.supabase_public_key,
+                        Authorization: 'Bearer ' + uploadAuthorization,
                     },
-                );
+                    body: JSON.stringify({ prefixes: uploadedPaths }),
+                    signal: AbortSignal.timeout(8000),
+                },
+            ).then((cleanup) => {
                 if (!cleanup.ok) console.warn('Temporary upload cleanup will need retry.');
-            } catch {
+            }).catch(() => {
                 console.warn('Temporary upload cleanup could not finish.');
-            }
+            });
         }
         if (generationController === controller) generationController = null;
     }
@@ -1637,14 +1659,14 @@ async function generatePaper() {
         !Number.isFinite(marks) ||
         marks <= 0 ||
         !Number.isFinite(duration) ||
-        duration <= 0 ||
+        duration < 1 ||
         duration > 600
     )
         return showGenerationError('paper', 'Enter valid marks and a duration from 1–600 minutes.');
     const button = byId('generateButton');
     const draftKey = paperDraftKey();
     const filename = materialFiles.paper.map((file) => file.name).join(', ');
-    const inputs = [...document.querySelectorAll('#page-create input, #page-create select')].map(
+    const inputs = [...document.querySelectorAll('#page-create input, #page-create select, #upload')].map(
         (input) => [input, input.disabled],
     );
     inputs.forEach(([input]) => (input.disabled = true));
@@ -1681,13 +1703,13 @@ async function generatePaper() {
         inputs.forEach(([input, disabled]) => (input.disabled = disabled));
         button.disabled = false;
         button.setAttribute('aria-busy', 'false');
-        button.textContent = '✦ Generate Question Paper →';
+        button.textContent = 'Generate Question Paper';
         updatePreview();
     }
 }
 async function startTest() {
-    if (quizSource !== 'pdf') return startTopicPractice();
     if (generationController) return toast('A generation is already in progress.');
+    if (quizSource !== 'pdf') return startTopicPractice();
     const n = Number(byId('mcqCount').value),
         per = Number(byId('timePerQuestion').value);
     if (!Number.isInteger(n) || n < 1 || n > 50)
@@ -1695,6 +1717,9 @@ async function startTest() {
     if (!Number.isFinite(per) || per < 0.25 || per > 30)
         return showGenerationError('quiz', 'Choose 0.25–30 minutes per question.');
     const button = document.querySelector('#testSetup button[onclick="startTest()"]');
+    const controls = [...document.querySelectorAll('#testSetup input, #testSetup select, #testSetup button')]
+        .map((input) => [input, input.disabled]);
+    controls.forEach(([input]) => (input.disabled = true));
     button.disabled = true;
     button.setAttribute('aria-busy', 'true');
     button.innerHTML = '<span class="generation-spinner" aria-hidden="true"></span> Generating…';
@@ -1733,6 +1758,7 @@ async function startTest() {
     } catch (e) {
         if (!e.accountChanged) showGenerationError('quiz', e.message);
     } finally {
+        controls.forEach(([input, disabled]) => (input.disabled = disabled));
         button.disabled = false;
         button.setAttribute('aria-busy', 'false');
         updateQuizSourceNote();
@@ -1752,22 +1778,11 @@ function downloadPaper(answer) {
     w.document.close();
     w.focus();
 }
-const pdfHint = document.querySelector('#page-preview .mini-card p');
-if (pdfHint)
-    pdfHint.textContent = 'Upload your study material in Online Test to generate a timed MCQ test.';
 // 5. SHARED CONFIGURATION: key status and public Supabase settings (never the AI key).
 window.examConfigPromise = fetch('/api/status', { signal: AbortSignal.timeout(15000) })
     .then(async (response) => {
         if (!response.ok) throw new Error('Backend unavailable (HTTP ' + response.status + ').');
         const config = await response.json();
-        if (studyNote && config.answer_lengths) {
-            studyNote.textContent =
-                'Notes, syllabus or both — automatically detected. ' +
-                Object.entries(config.answer_lengths)
-                    .map(([kind, range]) => kind + ': ' + range[0] + '–' + range[1] + ' words')
-                    .join('; ') +
-                '.';
-        }
         if (!config.configured && !generationController)
             setGenerationStatus(
                 'paper',
@@ -1799,6 +1814,7 @@ const ExamStore = (() => {
         retryTimer = null;
     const pendingMemory = new Map();
     const acknowledged = new Map();
+    const migrated = new Set();
     const cacheKey = (user, kind) => 'examcraft-v2-' + user + '-' + kind;
     const queueKey = (user) => 'examcraft-v3-' + user + '-outbox';
     const statusBox = document.createElement('div');
@@ -1841,7 +1857,8 @@ const ExamStore = (() => {
         renderHistory();
     }
     function cache() {
-        const user = authUser?.id || 'guest';
+        const user = authUser?.id;
+        if (!user) return false;
         try {
             localStorage.setItem(cacheKey(user, 'papers'), JSON.stringify(savedPapers));
             localStorage.setItem(cacheKey(user, 'attempts'), JSON.stringify(attempts));
@@ -1967,7 +1984,14 @@ const ExamStore = (() => {
         }
         const rows = await loadRows(TABLES[kind], user, token);
         if (!current(user, token) || !rows) return false;
-        // Merge into CURRENT arrays: a test may finish while the SELECT is running.
+        // Only migrate legacy local records missing from this account's cloud rows.
+        const migrationKey = cacheKey(user, kind);
+        if (!migrated.has(migrationKey)) {
+            const known = new Set(rows.map((row) => String(row.id)));
+            for (const item of kind === 'papers' ? savedPapers : attempts)
+                if (!known.has(String(item.id))) queue(kind, item);
+            migrated.add(migrationKey);
+        }
         if (kind === 'papers') savedPapers = mergeRows(rows, savedPapers, kind, user);
         else attempts = mergeRows(rows, attempts, kind, user);
         return true;
@@ -2011,31 +2035,22 @@ const ExamStore = (() => {
         epoch++;
         clearTimeout(retryTimer);
         if (!user) {
-            attempts = list(cacheKey('guest', 'attempts'));
+            attempts = [];
             refresh();
-            status('Sign in to sync tests and papers. Guest practice stays on this device.');
+            status('Sign in to save papers, test history and performance. Guest work is not saved.');
             retryButton.hidden = true;
             return;
         }
         savedPapers = mergeRows([], savedPapers, 'papers', next);
         attempts = mergeRows([], attempts, 'attempts', next);
         refresh();
-        // Migrate only this authenticated account's old cache, never another user's.
-        for (const paper of savedPapers) queue('papers', paper);
-        for (const attempt of attempts) queue('attempts', attempt);
         // Defer Supabase requests outside onAuthStateChange to avoid auth-lock deadlocks.
         setTimeout(() => sync(), 0);
     }
     function saveAttempt(attempt) {
         if (!owner) {
-            const ok = cache();
             refresh();
-            status(
-                ok
-                    ? 'Guest result saved on this device. Sign in before your next test for account sync.'
-                    : 'This result is only in memory. Browser storage is unavailable.',
-                !ok,
-            );
+            status('Test complete. Sign in before your next test to save its history and performance.');
             return;
         }
         const durable = queue('attempts', attempt);
@@ -2100,7 +2115,7 @@ function persist() {
 }
 function saveCurrentPaper() {
     if (!activePaper) return toast('Generate a paper first.');
-    return ExamStore.savePaper(activePaper);
+    return authUser ? ExamStore.savePaper(activePaper) : openAuth('login', activePaper);
 }
 // EDIT: Save an online MCQ paper, separately from its automatic score/history save.
 // Reuse the test ID from live state or history; keep the running timer/answers intact.
@@ -2128,7 +2143,7 @@ function saveTestPaper() {
                     answer: question.o[question.a],
                     source:
                         question.source ||
-                        (record.source === 'topic' ? 'Built-in topic practice' : 'Not recorded'),
+                        (record.source === 'topic' ? 'Topic practice' : 'Not recorded'),
                 })),
             },
         ],
@@ -2148,10 +2163,15 @@ function openSavedPdf(index) {
     const paper = savedPapers[index];
     if (!paper) return;
     activePaper = structuredClone(paper);
+    generatedDraftKey = null;
+    updatePreview();
     downloadPaper(false); // Same stored content; no Gemini request or regeneration.
 }
 
 // STARTUP: run only after every UI and storage function has been defined.
 showFullPreview();
+// Let Supabase consume email confirmation/recovery fragments before routing them.
+if (!/(?:^#|&)(?:access_token|refresh_token|type|error|error_code|error_description)=/.test(location.hash)) {
+    initializeNavigation();
+}
 initializeAuth();
-if (location.hash && pageNames[location.hash.slice(1)]) navigate(location.hash.slice(1));

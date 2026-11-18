@@ -1,160 +1,124 @@
-EXAMCRAFT AI — SAME-FILE EDITION — 4 NOVEMBER 2026
-Version: 3.4-auto-syllabus
+EXAMCRAFT AI
+Version 3.9-ui-fix · 18 November 2026
 
-1. WHAT CHANGED
+UI patch: Student Workspace is raised, its avatar stays visible and the menu
+scrolls separately on short screens. The extra header Back arrow is removed.
+Full GitHub > Supabase > Vercel setup instructions are in README.md.
 
-Upload notes, a syllabus photo/PDF, or both in the SAME existing upload box.
-There is no separate Notes/Syllabus switch. The AI reads the visible material,
-including scanned PDFs, in the normal generation request. Notes stay grounded
-in their content; syllabus questions use established knowledge within its topics.
-Syllabus answers identify that they use subject knowledge. Requested question
-counts and answer limits still apply; unreadable material reports an error.
+1. GENERATING FROM STUDY MATERIAL
 
-The interface, animations, login, signup/reset, topic practice, MCQ timer,
-question types/counts, preview, review, performance and PDF export are retained.
-Save Paper works on the generated-paper preview, live MCQ test and result/review
-screen. It stores a snapshot in My Papers; opening/exporting it needs no new AI
-request. Saving during a test neither submits it nor resets its timer. Repeated
-saves of the same paper/test do not add duplicate entries.
+Use the same upload box for a syllabus, notes or both. A syllabus supplies the
+scope for conceptual questions, predictions, comparisons and worked problems.
+For notes, questions use the supplied content. Mixed uploads use relevant notes
+for detail and the syllabus for topic coverage. Each answer includes a short
+source reference. S1 means the first selected file, S2 the second, and so on.
 
-Performance is calculated from saved completed tests, not from saved papers.
-Each completed test has its own record. A paper-sync error no longer blocks
-score saving, and a score-sync error no longer blocks My Papers. Pending saves
-survive reload/login through an account-specific browser outbox, even if the
-secondary cache write fails. Sync errors now distinguish schema and permission
-problems. Sign in BEFORE starting a test for account/cloud history; guest
-practice remains on that browser/device.
+Choose 1–50 questions across MCQ, True / False, Very Short, Short and Long.
+Set a section count to zero to skip it. Very Short answers use one or two useful
+sentences. Short answers usually target 50–80 words and Long answers 100–150 words,
+including reasoning and a relevant example or worked application. Targets are
+flexible. The existing request produces the expanded answers. Word counts do not
+trigger correction calls. Preview and export each document with Print / Save as PDF.
 
-Code cleanup reuses the existing DOM helper for 110 lookups and shares the
-countdown between topic and AI tests. No extra project files were added.
+Browser Back/Forward moves one visited page at a time. The extra header Back arrow
+has been removed. A fresh direct page link gets a Dashboard entry before
+it. Reload preserves the route history. In-tab navigation keeps your form inputs,
+uploads and running test. Login and recovery redirects update the current entry.
 
-2. CODE UPDATE AND SUPABASE SETUP ARE BOTH NEEDED
+Question counts show which sections are included. Buttons, preview tabs and file
+cards give hover, focus and press feedback. Settings and the device reduced-motion
+preference control animation.
 
-Fresh read-only checks on 4 November 2026, using this project's public API key:
-- test_attempts and question_papers respond to zero-row requests (HTTP 200).
-- examcraft_attempts and examcraft_papers return PGRST205 (missing from the API
-  schema cache). These are the tables the updated persistence code uses.
-- Full schema metadata could not be retrieved without further authentication.
-  No rows were read; authenticated write/RLS behavior has not been verified.
+The server recognises some outline-recall stems in English, Hindi and Spanish.
+It also checks choices, duplicate stems, source numbers and question counts.
+One correction pass can replace rejected or missing items. The app returns a
+complete validated paper or an error with the current settings available to edit.
 
-A similarly named table is not automatically compatible: columns, key types and
-policies must match. This package deliberately does not rename, delete, migrate
-or overwrite test_attempts/question_papers. It uses its own snapshot tables.
-Existing rows in those older tables are NOT automatically imported because their
-schema is unverified. Existing account-specific browser history is retained and
-queued for sync; use the same browser and site origin before clearing its data.
+2. SPEED AND UPLOADS
 
-To activate this version:
-1) Replace the matching nine files at your repository root with this package.
-   Keep your server-side GEMINI_API_KEY and existing local .env. Redeploy/restart.
-   If you already use the 28 October same-file edition, only app.py, backend.js,
-   README.md and README.txt changed in this update.
-2) In the SAME Supabase project, open SQL Editor -> New query. Copy the complete
-   block below from begin; through commit; and run it once. It creates the two
-   missing snapshot tables, per-user policies and the private temporary upload
-   bucket. It does not delete or alter your older test_attempts/question_papers.
-3) Sign in to the updated site. Open Settings -> Retry sync. Complete a test,
-   save a paper, reload and check Performance, Test History and My Papers.
+The fast path sends compact, page-labelled text for clearly readable simple
+PDFs. Every page must qualify. Scans, tables, figures and uncertain extractions
+retain the original PDF. Clear small images keep their original encoding.
+When combined binary material exceeds the inline budget, the server sends
+the largest files through the Files API and cleans up temporary files.
 
-Table mapping for this package:
-  Completed tests / Performance -> public.examcraft_attempts
-  Save Paper / My Papers        -> public.examcraft_papers
-  Large temporary source files  -> private bucket examcraft-material
+A small paper usually needs one successful model generation. For a text-only
+paper of 12 or more questions, the server can overlap two groups of complete
+sections when both groups contain enough work and a worker is available.
+All groups receive every source. They are validated together before display.
 
-The schema uses (user_id,id) as its key, a JSON snapshot in data and created_at;
-papers also have a deleted marker so stale devices cannot restore removed papers.
-RLS restricts each account to its own rows. Keep RLS enabled. The browser uses
-the user's session and the publishable key, never a service-role key.
-The SQL is re-runnable for this snapshot schema. CREATE TABLE IF NOT EXISTS does
-not migrate an existing incompatible table of the same name; inspect it first.
-This task did not change your live database, push GitHub or redeploy Vercel.
+The interface shows elapsed time. The response contains timings_ms for prepare,
+ai, validation, cleanup and total. The 30–40 second target depends on actual
+Gemini service time, output length, network conditions and uploaded material.
+Expanded answers can increase generation time. This update has been checked with
+local test responses, so the additional live response time is unmeasured.
 
-3. RUNNING AND DEPLOYMENT
+Upload up to 8 files and 50 MiB combined. Hosted guests have a 3 MiB combined
+limit. Signed-in hosted uploads above 3 MiB use private Supabase Storage.
+Local guests can use the full 50 MiB. The maximum is 1000 PDF pages combined
+and 40 megapixels per image. Supported formats are PDF, JPG, PNG and WebP.
 
-Same nine files:
-  FINALV2.html, backend.js, app.py, requirements.txt, START.bat,
-  .env.example, .gitignore, README.md, README.txt.
+3. ACCOUNT AND SAVING
 
-Windows:
+Guests can generate papers and take tests. Guest previews and results live in
+memory until the page reloads or closes. From a guest paper preview, Sign in to
+save returns to that paper after same-tab login. Choose Save Paper to keep it.
+A signup requiring email confirmation can take you to another tab, so download
+a guest paper before leaving. Guest test history stays out of the account.
+
+Signed-in users can save papers from the preview or from a running/completed MCQ
+test. My Papers stores question and answer snapshots. Saving a running test keeps
+its timer going. Test completion records the attempt separately for History and
+Performance. Pending account saves survive reload and retry. Settings shows sync
+status. Keep pending data on the same browser/site until sync completes.
+
+Account papers        public.examcraft_papers
+Completed attempts    public.examcraft_attempts
+Temporary uploads     private bucket examcraft-material
+
+4. INSTALL OR UPDATE
+
+On Windows, keep your existing .env or copy .env.example to .env and enter your
+server-side GEMINI_API_KEY. Keep GEMINI_MODEL=auto to choose an available Flash
+model. Install and run with the following commands, or double-click START.bat.
+
   py -m pip install -r requirements.txt
   py app.py
-Or run the existing START.bat. On macOS/Linux use python3 instead of py.
-Open http://localhost:8000/FINALV2.html, not the HTML file directly.
-Set GEMINI_API_KEY in the server environment or local .env; use GEMINI_MODEL=auto.
-Never put the Gemini key into browser JavaScript or commit .env.
 
-Vercel: keep these files at the root, select the Flask preset, remove old static
-build/output overrides, and keep the server environment variables. No npm build
-or additional routing file is needed. /api/status should show 3.4-auto-syllabus.
-Generation uses a 255-second backend budget; ensure the hosting function duration
-can accommodate this within the limits of your plan. A live deployment/build was
-not performed in this task.
+On macOS/Linux, use python3. Open http://localhost:8000/FINALV2.html.
 
-Supabase Authentication -> URL Configuration:
-  Site URL: https://exam-craft-ai-eight.vercel.app
-  Redirect URLs for the paths you use:
-    https://exam-craft-ai-eight.vercel.app/
-    https://exam-craft-ai-eight.vercel.app/FINALV2.html
-    http://localhost:8000/FINALV2.html
-Add the exact URL of any other preview/custom domain you use.
+For an existing Vercel project, put the package contents at the repository root,
+keep the existing environment settings and redeploy. Open /api/status and check
+for 3.9-ui-fix. Existing snapshot tables and the private upload bucket
+support this update. An installation that already has them can skip the SQL.
 
-4. EDIT MAP AND PRESERVED LIMITS
+For a new Supabase project, set SUPABASE_URL and SUPABASE_PUBLIC_KEY together.
+Enable email authentication and configure the Site URL / Redirect URLs in
+Authentication > URL Configuration. Use your actual production and local URLs.
 
-FINALV2.html: page layout, CSS and animations; unchanged from the previous package.
-backend.js: browser interaction, uploads, quiz, login, saving and PDF printing.
-  byId / startTestTimer: shared DOM lookup and quiz countdown.
-  EDIT J7 / addMaterial / requestQuestions: one combined PDF/image upload path.
-  generatePaper / startTest: paper and timed AI test generation.
-  EDIT J8 / ExamStore: cache, outbox, independent table sync, per-account records.
-  saveCurrentPaper / saveTestPaper: explicit snapshots for My Papers.
-app.py: Python/Flask server, Gemini prompts, upload validation and output checks.
-  EDIT 1 / ANSWER_LENGTHS: Very Short 20–30; Short 40–50; Long 100–180 words.
-  EDIT 5 / SYSTEM_INSTRUCTION: automatic notes/syllabus/mixed content rules.
-  repair_answer_lengths: correct only failing answers; preserve valid answers.
-  SECTION 6 / generate: files -> one AI generation -> validation/repair -> output.
-  SECTION 7: HTTP endpoints and authenticated generation.
+  Site URL      https://exam-craft-ai-final.vercel.app
+  Redirects     https://exam-craft-ai-final.vercel.app/
+                https://exam-craft-ai-final.vercel.app/FINALV2.html
+                http://localhost:8000/FINALV2.html
 
-Uploads: up to 8 PDF/JPG/PNG/WebP files together, 50 MB combined, up to 1000 PDF
-pages and 40 megapixels per image. Up to 50 AI questions per request. No file is
-silently discarded. Small combined inputs up to 4 MiB inline PDFs including scans;
-larger PDFs retain the existing Gemini Files API path. Two independent answer
-repair batches may overlap; no word limits/counts have been reduced. Backend
-stage timings are returned in timings_ms. Actual AI latency/quality is unmeasured
-here; 15–20 seconds is not a guarantee.
+Run the SQL below once in SQL Editor > New query when setting up a new project.
+Use the session with the public key in the browser. Keep row-level security on.
 
-On Vercel, selections above 2.5 MiB upload to private Supabase Storage first,
-then only object paths go through the server. The server verifies ownership.
-Temporary uploads are removed when cleanup succeeds; network/tab interruption
-can leave temporary files. Saved papers store their full content, not those
-source uploads or a binary PDF. My Papers can export the same content again.
+5. CHECKS AND TROUBLESHOOTING
 
-5. VERIFICATION AND TROUBLESHOOTING
+Local checks cover syllabus, notes, mixed sources, scan/diagram preservation,
+targeted correction, exact counts, simultaneous sections and upload limits.
+Browser checks exercise guest reload, both printed PDFs, same-tab sign-in,
+explicit saves, private uploads, saved history, retry and mobile navigation.
+Back/Forward checks include direct links, reload, active tests, generated previews,
+rapid transitions, unchanged generation counts and small-screen header layout.
+The Supabase browser SDK used local test endpoints. The SQL was exercised on
+a local PostgreSQL engine with test accounts. Live Gemini latency, email delivery
+and the production Supabase account require the deployed services.
 
-Current checks use simulated external services, not your signed-in live account.
-- 33 existing Python regression checks pass: counts, answer lengths/repair,
-  mixed/scanned PDFs, upload cleanup, deadlines, fallback, auth and routes.
-- 12 persistence/timer checks pass: individual scores, duplicate Save Paper,
-  reload/login, independent failures, retry, pagination, account isolation,
-  second-device merge, tombstones, outbox recovery and MCQ saving during a test.
-- 2 upload integration checks pass: photos/scans/mixed inputs use the same
-  endpoint without a mode selector or extra classification request; unreadable
-  material returns an error rather than a fabricated paper.
-- JavaScript syntax and Python compilation pass. HTML/CSS are byte-for-byte
-  unchanged from the 28 October same-file package. No browser screenshot or live
-  Gemini generation/database write was used to claim an end-to-end live result.
-
-If Settings reports a table/column problem: apply/check section 2 and the SQL.
-Permission denied: check authenticated grants and own-row RLS policies.
-Cloud failure/offline: keep pending records on this device; use Retry sync.
-Local storage full: keep the tab open until cloud sync succeeds.
-Missing key: set the server-side GEMINI_API_KEY, then redeploy/restart.
-413/504: use the updated upload path; check hosting setup or reduce input size.
-429: respect provider quota; retry later. Model issues: keep GEMINI_MODEL=auto.
-Export popup blocked: allow the popup, then Print / Save as PDF.
-
-Supabase policy/upsert references checked on 4 November 2026:
-https://supabase.com/docs/guides/database/postgres/row-level-security
-https://supabase.com/docs/reference/javascript/upsert
+If saving is pending, open Settings and choose Retry sync. For a quota error,
+check the Gemini project quota. For a large or timed-out generation, try fewer
+questions or a smaller document. Allow the print window when exporting a PDF.
 
 BEGIN SUPABASE SQL — COPY FROM begin; THROUGH commit;
 begin;

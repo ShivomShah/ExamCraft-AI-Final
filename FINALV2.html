@@ -101,13 +101,15 @@ p {
     position: sticky;
     top: 0;
     height: 100vh;
-    padding: 30px 16px 22px;
+    height: 100dvh;
+    padding: 30px 16px calc(42px + env(safe-area-inset-bottom, 0px));
     display: flex;
     flex-direction: column;
     z-index: 20;
 }
 .brand {
     display: flex;
+    flex-shrink: 0;
     align-items: center;
     gap: 11px;
     padding: 0 13px 36px;
@@ -139,6 +141,13 @@ p {
     font-weight: 800;
     padding: 0 15px;
     margin: 14px 0 12px;
+}
+.sidebar-navigation {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
 }
 .nav {
     display: grid;
@@ -174,6 +183,7 @@ p {
 }
 .sidebar-bottom {
     margin-top: auto;
+    flex-shrink: 0;
 }
 .upgrade {
     padding: 18px;
@@ -217,6 +227,7 @@ p {
 .profile small {
     color: var(--muted);
 }
+.profile .avatar { flex-shrink: 0; }
 .main {
     min-width: 0;
     flex: 1;
@@ -332,6 +343,13 @@ p {
 .btn.primary:hover {
     transform: translateY(-3px);
     box-shadow: 0 12px 25px #7857e950;
+}
+.btn.paper-generate {
+    width: 100%;
+    min-height: 54px;
+    padding: 15px 24px;
+    border-radius: 999px;
+    font-size: 15px;
 }
 .btn.soft {
     color: var(--purple);
@@ -619,15 +637,9 @@ p {
     border-color: #896cf1;
     transform: translateY(-2px);
 }
-.upload .bigicon {
-    font-size: 35px;
-}
 .upload strong {
     display: block;
     margin: 10px 0 4px;
-}
-.upload p {
-    font-size: 12px;
 }
 .split {
     display: grid;
@@ -773,7 +785,7 @@ p {
 .small {
     font-size: 12px;
 }
-.hidden {
+[hidden], .hidden {
     display: none !important;
 }
 .toast {
@@ -1336,7 +1348,7 @@ body {
     background: linear-gradient(135deg, #faf7ff, #f5f7ff);
 }
 .btn {
-    border-radius: 14px;
+    border-radius: 999px;
 }
 .input {
     border-radius: 14px;
@@ -1425,17 +1437,6 @@ body {
     color: #5935bd;
     font-size: 22px;
 }
-.source-badge {
-    position: absolute;
-    right: 10px;
-    top: 12px;
-    font-size: 9px;
-    background: #e9ddfc;
-    color: #563099;
-    padding: 5px 7px;
-    border-radius: 20px;
-    font-weight: 800;
-}
 .quiz-upload {
     padding: 27px 15px;
     background: linear-gradient(135deg, #fcfaff, #f1f3ff);
@@ -1492,12 +1493,7 @@ body {
         padding: 15px 12px;
         min-height: 150px;
     }
-    .source-badge {
-        position: static;
-        display: inline-block;
-        margin-top: 8px;
-    }
-    .source-choice small {
+        .source-choice small {
         font-size: 11px;
     }
 }
@@ -2274,26 +2270,62 @@ p {
     }
 }
 
-/* Generation controls */
-.source-files{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:12px;margin-top:14px}.source-file{border:1px solid #ded8eb;border-radius:13px;padding:10px;background:#fff;min-width:0}.source-file img{width:100%;height:100px;object-fit:contain;background:#f6f3fa;border-radius:8px}.source-file strong{display:block;overflow-wrap:anywhere;font-size:12px;color:#302642;margin:8px 0}.source-file button{font-size:12px;padding:6px 10px}.generation-status{color:#463565;background:#f5f0ff;border-radius:12px;padding:12px 14px;line-height:1.6;margin:12px 0;overflow-wrap:anywhere}.generation-status:empty{display:none}.source-ref{color:#504963;font-size:12px}button:disabled{cursor:wait}.preview-sheet p{white-space:pre-wrap}
+/* Buttons, uploads and feedback share the existing violet palette. */
+.brandmark, .avatar, .account-profile .avatar, .stat-icon, .tile-icon,
+.round, .source-icon, .upload-symbol { border-radius: 50%; }
+.nav .ui-icon { box-sizing: content-box; width: 17px; height: 17px; padding: 5px; border-radius: 50%; background: #f3f0f9; }
+.nav button.active .ui-icon { color: #5634ae; background: #e8ddff; }
+.btn.primary:not(:disabled) { background: linear-gradient(115deg, #7045d6, #5531b4); }
+.btn.outline:not(:disabled) { border-color: #d8cfea; color: #504361; }
+.btn.soft:not(:disabled) { background: #eee8fb; color: #513394; }
+.btn:focus-visible, .round:focus-visible, .upload:focus-visible, .source-choice:focus-visible {
+    outline: 3px solid #7653cd; outline-offset: 3px;
+}
+h1[tabindex="-1"]:focus { outline: none; }
+.btn:disabled { cursor: not-allowed; transform: none; }
+.btn[aria-busy="true"] { cursor: progress; }
+.upload { display: grid; width: 100%; justify-items: center; gap: 6px; color: var(--ink); font: inherit; }
+.upload strong { margin: 3px 0 0; }
+.upload-meta, .upload-limit { color: #605672; font-size: 12px; line-height: 1.6; }
+.upload-limit { margin: 10px 0 0; }
+.source-files { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(145px,100%),1fr)); gap: 10px; }
+.source-files:not(:empty) { margin-top: 12px; }
+.source-file { display: grid; align-content: start; gap: 8px; min-width: 0; padding: 12px; border: 1px solid #ded6ec; border-radius: 16px; background: #fbfaff; }
+.source-file img { width: 100%; height: 84px; object-fit: contain; border-radius: 10px; }
+.source-file strong, .generation-status { overflow-wrap: anywhere; }
+.source-file strong, .source-file .btn { font-size: 12px; }
+.source-file .btn { justify-self: start; min-height: 34px; padding: 6px 12px; }
+.generation-status { margin: 12px 0; padding: 12px 14px; border: 1px solid #ded3f4; border-radius: 16px; color: #392a58; background: #f5f0ff; line-height: 1.55; }
+.generation-status:empty { display: none; }
+.generation-status[data-phase="error"] { background: #fff2f2; border-color: #e9b8bf; color: #8b2637; }
+.generation-status[data-phase="success"] { background: #edf9f1; border-color: #b9ddc6; color: #185c38; }
+.generation-status-row { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.generation-status-message { flex: 1; min-width: 120px; font-weight: 700; }
+.generation-elapsed { font-size: 12px; font-variant-numeric: tabular-nums; color: #54436e; }
+.generation-spinner { display: inline-block; flex: none; width: 17px; height: 17px; border: 2px solid #c4b8e1; border-top-color: #5930b9; border-radius: 50%; animation: generation-spin .8s linear infinite; }
+.draft-note { color: #57416e; background: #f5f0fc; border-radius: 10px; padding: 10px; }
+.draft-summary { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 12px; margin: 10px 0; color: #4e3b68; }
+.source-ref { color: #504963; font-size: 12px; }
+.preview-sheet { min-width: 0; overflow-wrap: anywhere; }
+.preview-sheet p { white-space: pre-wrap; }
+@keyframes generation-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .generation-spinner { animation: none; } }
 
-/* Generation controls */
-
-    .generation-status { border: 1px solid #ded3f4; color: #392a58; }
-    .generation-status[data-phase="error"] { background: #fff2f2; border-color: #e9b8bf; color: #8b2637; }
-    .generation-status[data-phase="success"] { background: #edf9f1; border-color: #b9ddc6; color: #185c38; }
-    .generation-status[hidden] { display: none; }
-    .generation-status-row { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
-    .generation-status-message { flex: 1; min-width: 150px; font-weight: 700; }
-    .generation-elapsed { font-size: 12px; color: #54436e; }
-    .generation-spinner { display: inline-block; width: 17px; height: 17px; border: 2px solid #b9a9de; border-top-color: #5930b9; border-radius: 50%; animation: generation-spin .8s linear infinite; flex-shrink: 0; }
-    #generateButton .generation-spinner { border-color: #ada0c9; border-top-color: #442174; }
-    .draft-note { color: #57416e !important; background: #f5f0fc; border-radius: 8px; padding: 10px; }
-    .draft-question { color: #5c536b !important; padding: 9px 0; border-bottom: 1px dashed #ded6ea; }
-    .draft-summary { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 12px; margin: 10px 0; color: #4e3b68; }
-    @keyframes generation-spin { to { transform: rotate(360deg); } }
-    @media(prefers-reduced-motion: reduce) { .generation-spinner { animation: none; } }
-
+/* Small feedback changes for existing controls. */
+.counter-row { transition: background .18s, border-color .18s; }
+.counter-row.included { border-bottom-color: #d7c8f4; }
+.counter-row.included > strong { color: #5731bd; }
+.counter-row:focus-within { background: #f5f0ff; }
+.tabset button, .source-file { transition: border-color .18s, box-shadow .18s, transform .18s; }
+.tabset button:focus-visible, .question-map button:focus-visible { outline: 3px solid #7653cd; outline-offset: 3px; }
+.source-choice:not(:disabled):active, .tabset button:active, .question-map button:active { transform: scale(.98); }
+@media (hover: hover) {
+    .tabset button:not(.active):hover { background: #e4d9f7; }
+    .source-file:hover { border-color: #bba4e5; box-shadow: 0 4px 12px #51359210; }
+}
+.topbar > .flex { min-width: 0; }
+.breadcrumb { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 380px) { .topbar > .flex { gap: 6px; } .topbar .round { width: 34px; height: 34px; } }
 
 @keyframes drawLine { to { stroke-dashoffset: 0; } }
 
@@ -2320,6 +2352,7 @@ p {
                             <circle cx="22" cy="18" r="1" /></svg></span
                     ><span>ExamCraft <em>AI</em></span>
                 </div>
+                <div class="sidebar-navigation">
                 <div class="nav-label">Workspace</div>
                 <nav class="nav" id="nav">
                     <button class="active" data-page="dashboard">
@@ -2443,6 +2476,7 @@ p {
                         ><span>Settings</span>
                     </button>
                 </nav>
+                </div>
                 <div class="sidebar-bottom">
                     <div class="profile">
                         <div class="avatar">S</div>
@@ -2462,7 +2496,8 @@ p {
                             onclick="document.getElementById('sidebar').classList.toggle('open')"
                         >
                             ☰</button
-                        ><span class="breadcrumb" id="breadcrumb">Dashboard</span>
+                        >
+                        <span class="breadcrumb" id="breadcrumb">Dashboard</span>
                     </div>
                     <div class="top-actions">
                         <label class="search"
@@ -2591,10 +2626,10 @@ p {
                                             />
                                         </svg>
                                     </div>
-                                    <span class="tag">↗ 12%</span>
+                                    <span class="tag">No tests yet</span>
                                 </div>
                                 <small>Highest Score</small>
-                                <div class="num">24</div>
+                                <div class="num">—</div>
                             </div>
                             <div class="card stat fade-up">
                                 <div class="stat-top">
@@ -2614,10 +2649,10 @@ p {
                                             <circle cx="12" cy="12" r="1" />
                                         </svg>
                                     </div>
-                                    <span class="tag">↗ 8%</span>
+                                    <span class="tag">Completed</span>
                                 </div>
                                 <small>Tests Completed</small>
-                                <div class="num">18</div>
+                                <div class="num">0</div>
                             </div>
                             <div class="card stat fade-up">
                                 <div class="stat-top">
@@ -2635,18 +2670,18 @@ p {
                                             <path d="M4 4v16h16M8 15l4-5 4 2 5-7" />
                                         </svg>
                                     </div>
-                                    <span class="tag">↗ 6%</span>
+                                    <span class="tag">No tests yet</span>
                                 </div>
                                 <small>Average Score</small>
-                                <div class="num">78<span style="font-size: 17px">%</span></div>
+                                <div class="num">—</div>
                             </div>
                             <div class="card stat fade-up">
                                 <div class="stat-top">
                                     <div class="stat-icon orange">✧</div>
-                                    <span class="tag">+ 2 days</span>
+                                    <span class="tag">Start today</span>
                                 </div>
                                 <small>Study Streak</small>
-                                <div class="num">7 <span style="font-size: 16px">days</span></div>
+                                <div class="num">0 days</div>
                             </div>
                         </div>
                         <div class="grid two">
@@ -2759,36 +2794,10 @@ p {
                                             <th>STATUS</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td><b>Data Structures</b></td>
-                                            <td>MCQ Test</td>
-                                            <td>Today</td>
-                                            <td class="score">85%</td>
-                                            <td><span class="status">Completed</span></td>
-                                        </tr>
-                                        <tr>
-                                            <td><b>Operating Systems</b></td>
-                                            <td>Question Paper</td>
-                                            <td>Yesterday</td>
-                                            <td>—</td>
-                                            <td><span class="status">Created</span></td>
-                                        </tr>
-                                        <tr>
-                                            <td><b>Python Programming</b></td>
-                                            <td>MCQ Test</td>
-                                            <td>Oct 10</td>
-                                            <td class="score">76%</td>
-                                            <td><span class="status">Completed</span></td>
-                                        </tr>
-                                    </tbody>
+                                    <tbody></tbody>
                                 </table>
                             </div>
                         </div>
-                        <p class="footer-note">
-                            Your activity in this browser · Metrics update after you save a paper or
-                            complete a test.
-                        </p>
                     </section>
                     <!-- EDIT PAGE CREATE: Paper details, default values and question counts -->
                     <section class="page" id="page-create">
@@ -2796,7 +2805,7 @@ p {
                             <div>
                                 <div class="eyebrow">CREATE & PRACTICE</div>
                                 <h1>Question Paper Studio</h1>
-                                <p>Set up your paper exactly how you want it.</p>
+                                <p>Choose your material, question types and difficulty.</p>
                             </div>
                             <button class="btn outline" onclick="navigate('papers')">
                                 My Papers →
@@ -2806,43 +2815,20 @@ p {
                             <div class="grid">
                                 <div class="card">
                                     <div class="section-head">
-                                        <h2>01 · Study Material</h2>
-                                        <span class="pill">PDF only</span>
+                                        <h2>Study Material</h2>
                                     </div>
-                                    <div
-                                        class="upload"
-                                        id="upload"
-                                        onclick="document.getElementById('pdfFile').click()"
-                                        ondragover="
-                                            event.preventDefault();
-                                            this.classList.add('drag');
-                                        "
-                                        ondragleave="this.classList.remove('drag')"
-                                        ondrop="handleDrop(event)"
-                                    >
-                                        <div class="bigicon">☁️</div>
-                                        <strong id="fileLabel"
-                                            >Click to upload your study PDF</strong
-                                        >
-                                        <p>Or drag and drop a file here · Max 50 MB</p>
-                                        <input
-                                            type="file"
-                                            id="pdfFile"
-                                            accept="application/pdf"
-                                            hidden
-                                            onchange="fileChosen(this.files[0])"
-                                        />
-                                    </div>
-                                    <p class="footer-note">
-                                        Prototype only: PDF content is not processed or uploaded
-                                        anywhere.
-                                    </p>
+                                    <button type="button" class="upload" id="upload">
+                                        <span class="upload-symbol" aria-hidden="true">↑</span>
+                                        <strong id="fileLabel">Add notes or syllabus</strong>
+                                        <span class="upload-meta">PDF, JPG, PNG or WebP</span>
+                                    </button>
+                                    <input type="file" id="pdfFile" accept=".pdf,.jpg,.jpeg,.png,.webp" multiple hidden />
                                 </div>
                                 <div class="card">
-                                    <div class="section-head"><h2>02 · Paper Details</h2></div>
+                                    <div class="section-head"><h2>Paper Details</h2></div>
                                     <div class="form-grid">
                                         <div class="field">
-                                            <label>Subject name</label
+                                            <label for="subject">Subject name</label
                                             ><input
                                                 class="input"
                                                 id="subject"
@@ -2872,7 +2858,7 @@ p {
                                             </select>
                                         </div>
                                         <div class="field">
-                                            <label>Total marks</label
+                                            <label for="marks">Total marks</label
                                             ><input
                                                 class="input"
                                                 id="marks"
@@ -2886,7 +2872,7 @@ p {
                                 </div>
                                 <div class="card">
                                     <div class="section-head">
-                                        <h2>03 · Question Types</h2>
+                                        <h2>Question Types</h2>
                                         <span class="muted small">Set 0 to skip a section</span>
                                     </div>
                                     <div id="counters"></div>
@@ -2895,17 +2881,16 @@ p {
                                         ><strong
                                             style="font-size: 22px; color: var(--purple)"
                                             id="totalQuestions"
-                                            >25</strong
+                                            >0</strong
                                         >
                                     </div>
                                 </div>
                                 <button
-                                    class="btn primary"
-                                    style="width: 100%; padding: 16px"
+                                    class="btn primary paper-generate"
                                     id="generateButton"
                                     onclick="generatePaper()"
                                 >
-                                    ✦ Build Demo Paper →
+                                    Generate Question Paper
                                 </button>
                             </div>
                             <div
@@ -2914,7 +2899,7 @@ p {
                             >
                                 <div class="section-head">
                                     <h2>Live Paper Preview</h2>
-                                    <span class="pill">Sample</span>
+                                    <span class="pill">Live Draft</span>
                                 </div>
                                 <div class="preview-sheet" id="paperPreview"></div>
                                 <div class="flex" style="margin-top: 17px; flex-wrap: wrap">
@@ -2925,8 +2910,7 @@ p {
                                     </button>
                                 </div>
                                 <p class="footer-note">
-                                    Downloads contain sample questions in this prototype; real AI
-                                    generation comes later.
+                                    The paper and answer key open as separate printable documents.
                                 </p>
                             </div>
                         </div>
@@ -2943,7 +2927,7 @@ p {
                         <div id="testSetup" class="grid two">
                             <div class="card">
                                 <h2>Customize Your Test</h2>
-                                <p>Start with your PDF, or choose a topic for quick practice.</p>
+                                <p>Upload notes or a syllabus, or choose a topic for quick practice.</p>
                                 <div
                                     class="source-picker"
                                     role="group"
@@ -2956,9 +2940,8 @@ p {
                                         onclick="setQuizSource('pdf')"
                                     >
                                         <span class="source-icon">▤</span
-                                        ><strong>From your PDF</strong
-                                        ><small>Your notes, your practice</small
-                                        ><span class="source-badge">Recommended</span></button
+                                        ><strong>Notes / syllabus</strong
+                                        ><small>Generate from your files</small></button
                                     ><button
                                         id="sourceTopic"
                                         class="source-choice"
@@ -2967,55 +2950,16 @@ p {
                                     >
                                         <span class="source-icon">◎</span
                                         ><strong>Practice a topic</strong
-                                        ><small>Explore built-in questions</small>
+                                        ><small>Quick subject practice</small>
                                     </button>
                                 </div>
                                 <div id="quizPdfPanel">
-                                    <div
-                                        id="quizUpload"
-                                        class="upload quiz-upload"
-                                        role="button"
-                                        tabindex="0"
-                                        onclick="document.getElementById('quizPdfFile').click()"
-                                        onkeydown="
-                                            if (event.key === 'Enter' || event.key === ' ') {
-                                                event.preventDefault();
-                                                document.getElementById('quizPdfFile').click();
-                                            }
-                                        "
-                                        ondragover="
-                                            event.preventDefault();
-                                            this.classList.add('drag');
-                                        "
-                                        ondragleave="this.classList.remove('drag')"
-                                        ondrop="dropQuizPdf(event)"
-                                    >
-                                        <div class="upload-symbol">↑</div>
-                                        <strong id="quizFileLabel">Upload your study PDF</strong>
-                                        <p id="quizFileMeta">
-                                            Click or drag your notes here · PDF up to 50 MB
-                                        </p>
-                                        <input
-                                            type="file"
-                                            id="quizPdfFile"
-                                            accept="application/pdf,.pdf"
-                                            hidden
-                                            onchange="chooseQuizPdf(this.files[0])"
-                                        />
-                                    </div>
-                                    <button
-                                        class="btn outline hidden"
-                                        id="removeQuizPdf"
-                                        onclick="removeQuizFile()"
-                                        style="margin-top: 10px"
-                                    >
-                                        Remove PDF
+                                    <button type="button" class="upload quiz-upload" id="quizUpload">
+                                        <span class="upload-symbol" aria-hidden="true">↑</span>
+                                        <strong id="quizFileLabel">Add notes or syllabus</strong>
+                                        <span class="upload-meta">PDF, JPG, PNG or WebP</span>
                                     </button>
-                                    <p class="small" style="margin-top: 12px">
-                                        PDF-based generation will be connected with the AI API. For
-                                        now, you can preview the test interface with clearly labeled
-                                        sample questions.
-                                    </p>
+                                    <input type="file" id="quizPdfFile" accept=".pdf,.jpg,.jpeg,.png,.webp" multiple hidden />
                                 </div>
                                 <div id="quizTopicPanel" class="hidden">
                                     <div class="field">
@@ -3063,10 +3007,10 @@ p {
                                     style="margin-top: 24px; width: 100%"
                                     onclick="startTest()"
                                 >
-                                    ▶ Start Demo Test
+                                    Generate &amp; Start Test
                                 </button>
                                 <p class="footer-note">
-                                    Demo questions only; no PDF analysis or API connection yet.
+                                    Questions from your study material · Up to 50 questions
                                 </p>
                             </div>
                             <div
@@ -3106,7 +3050,7 @@ p {
                                 ></div>
                                 <!-- Save the questions without submitting or restarting the test. -->
                                 <div class="flex" style="margin-top: 16px; flex-wrap: wrap">
-                                    <button class="btn outline" onclick="saveTestPaper()">
+                                    <button class="btn outline" hidden onclick="saveTestPaper()">
                                         Save Paper
                                     </button>
                                     <span class="small">Keep this MCQ paper in My Papers.</span>
@@ -3173,7 +3117,7 @@ p {
                                     </div>
                                 </div>
                                 <div class="flex" style="justify-content: center; flex-wrap: wrap">
-                                    <button class="btn primary" onclick="saveTestPaper()">
+                                    <button class="btn primary" hidden onclick="saveTestPaper()">
                                         Save Paper
                                     </button>
                                     <button class="btn outline" onclick="resetTest()">
@@ -3220,29 +3164,9 @@ p {
                             class="grid"
                             style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr))"
                         >
-                            <div class="card clickable" onclick="navigate('create')">
-                                <div style="font-size: 36px; margin-bottom: 20px">📘</div>
-                                <h2>Data Structures</h2>
-                                <p>25 questions · 50 marks</p>
-                                <div class="flex between" style="margin-top: 20px">
-                                    <span class="pill">Demo paper</span><span>→</span>
-                                </div>
-                            </div>
-                            <div class="card clickable" onclick="navigate('create')">
-                                <div style="font-size: 36px; margin-bottom: 20px">📗</div>
-                                <h2>Operating Systems</h2>
-                                <p>20 questions · 40 marks</p>
-                                <div class="flex between" style="margin-top: 20px">
-                                    <span class="pill">Demo paper</span><span>→</span>
-                                </div>
-                            </div>
-                            <div class="card clickable" onclick="navigate('create')">
-                                <div style="font-size: 36px; margin-bottom: 20px">📙</div>
-                                <h2>Python Programming</h2>
-                                <p>30 questions · 60 marks</p>
-                                <div class="flex between" style="margin-top: 20px">
-                                    <span class="pill">Demo paper</span><span>→</span>
-                                </div>
+                            <div class="card empty" style="grid-column: 1/-1">
+                                <h2>Your saved papers appear here.</h2>
+                                <p>Choose Save Paper from a paper preview or an online MCQ test.</p>
                             </div>
                         </div>
                         <p class="footer-note">
@@ -3270,22 +3194,22 @@ p {
                         <div class="grid stats">
                             <div class="card stat">
                                 <small>Average Accuracy</small>
-                                <div class="num" style="margin-top: 18px">78%</div>
-                                <span class="tag">↗ Improving</span>
+                                <div class="num" style="margin-top: 18px">—</div>
+                                <span class="tag">No tests yet</span>
                             </div>
                             <div class="card stat">
                                 <small>Highest Score</small>
-                                <div class="num" style="margin-top: 18px">92%</div>
+                                <div class="num" style="margin-top: 18px">—</div>
                                 <span class="tag">Personal best</span>
                             </div>
                             <div class="card stat">
                                 <small>Tests Taken</small>
-                                <div class="num" style="margin-top: 18px">18</div>
+                                <div class="num" style="margin-top: 18px">0</div>
                                 <span class="muted small">Completed attempts</span>
                             </div>
                             <div class="card stat">
                                 <small>Practice Streak</small>
-                                <div class="num" style="margin-top: 18px">7 days</div>
+                                <div class="num" style="margin-top: 18px">0 days</div>
                                 <span class="tag">Keep going</span>
                             </div>
                         </div>
@@ -3500,17 +3424,13 @@ p {
                             <div class="paper-toolbar">
                                 <button class="btn outline" onclick="editCurrentPaper()">
                                     ← Edit setup</button
-                                ><button class="btn primary" onclick="saveCurrentPaper()">
+                                ><button class="btn primary" id="savePaperButton" onclick="saveCurrentPaper()">
                                     Save Paper
                                 </button>
                             </div>
                         </div>
-                        <div class="summary-note">
-                            Frontend demo · These are sample Data Structures questions, not
-                            generated from your PDF.
-                        </div>
                         <div class="section-head">
-                            <div class="tabset">
+                            <div class="tabset" role="group" aria-label="Preview document">
                                 <button
                                     id="tabPaper"
                                     class="active"
@@ -3541,13 +3461,13 @@ p {
                                     >
                                         ↓ Answer Key
                                     </button>
-                                    <p class="small">
-                                        Use “Save as PDF” in your browser’s print dialog.
+                                    <p class="small" id="paperSaveNote">
+                                        Download before reloading, or sign in to keep a copy.
                                     </p>
                                 </div>
                                 <div class="mini-card">
                                     <strong>Make it a practice session</strong>
-                                    <p>Try the interactive Data Structures demo quiz.</p>
+                                    <p>Upload your study material in Online Test to generate a timed MCQ test.</p>
                                     <button class="btn soft" onclick="navigate('test')">
                                         Take a Test →
                                     </button>
@@ -3621,9 +3541,9 @@ p {
                         <div class="card" style="margin-top: 22px">
                             <h2>Common Questions</h2>
                             <details open>
-                                <summary>Does this version read my PDF?</summary>
+                                <summary>Can I use notes and a syllabus together?</summary>
                                 <p>
-                                    Upload up to 8 PDFs or images: notes, syllabus or both. AI detects the material automatically. Review questions before use. Signed-in test results and papers you explicitly save sync to your account.
+                                    Yes. Upload notes, a syllabus or both in the same upload box. Signed-in users can select up to 8 PDFs or images, with a combined size of 50 MB. On the hosted app, guest uploads can total up to 3 MB.
                                 </p>
                             </details>
                             <details>
@@ -3638,8 +3558,8 @@ p {
                             <details>
                                 <summary>Where are my papers and attempts saved?</summary>
                                 <p>
-                                    In this browser’s local storage. They will not sync between
-                                    devices, and clearing browser data removes them.
+                                    Signed-in test results and papers you choose to save sync to your account.
+                                    Pending saves retry when you reconnect. Guests can generate and download, but their papers and test results are not saved.
                                 </p>
                             </details>
                             <details>
